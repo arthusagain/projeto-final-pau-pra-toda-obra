@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "419165156066",
+    "project_id": "pau-pra-toda-obra",
+    "storage_bucket": "pau-pra-toda-obra.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419165156066:android:7c3d1b47545cabf8afa4bb",
+        "android_client_info": {
+          "package_name": "com.ArthusJames.PauPraTodaObra"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "419165156066-qui9e5u9u5prtfc7ni5njvv4s2q4k4cj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYB1p8LJE3JEF7pkRIEDAXObO47Oz4sTE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "419165156066-qui9e5u9u5prtfc7ni5njvv4s2q4k4cj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
