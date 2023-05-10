@@ -1,8 +1,9 @@
 {
   "project_info": {
     "project_number": "419165156066",
+    "firebase_url": "https://pau-pra-toda-obra-default-rtdb.firebaseio.com/",
     "project_id": "pau-pra-toda-obra",
-    "storage_bucket": "pau-pra-toda-obra.appspot.com"
+    "storage_bucket": "pau-pra-toda-obra.appspot.com/"
   },
   "client": [
     {

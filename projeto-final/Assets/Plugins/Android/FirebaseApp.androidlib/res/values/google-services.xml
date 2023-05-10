@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/firebase_database_url,@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id,@string/default_web_client_id">
+  <string name="firebase_database_url" translatable="false">https://pau-pra-toda-obra-default-rtdb.firebaseio.com/</string>
+  <string name="gcm_defaultSenderId" translatable="false">419165156066</string>
+  <string name="google_storage_bucket" translatable="false">pau-pra-toda-obra.appspot.com/</string>
+  <string name="project_id" translatable="false">pau-pra-toda-obra</string>
+  <string name="google_api_key" translatable="false">AIzaSyDYB1p8LJE3JEF7pkRIEDAXObO47Oz4sTE</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDYB1p8LJE3JEF7pkRIEDAXObO47Oz4sTE</string>
+  <string name="google_app_id" translatable="false">1:419165156066:android:7c3d1b47545cabf8afa4bb</string>
+  <string name="default_web_client_id" translatable="false">419165156066-qui9e5u9u5prtfc7ni5njvv4s2q4k4cj.apps.googleusercontent.com</string>
+</resources>
