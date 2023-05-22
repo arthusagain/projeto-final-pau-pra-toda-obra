@@ -5,6 +5,32 @@ using UnityEngine.UI;
 
 public class MenuController : MonoBehaviour
 {
+    /****************
+    Clase MenuController
+
+    Singleton responsável por:
+    -   Empilhar janelas visitadas, seus títulos e os valores auxiliares necessários para replicá-las
+    -   Permitir retornar à janela visitada anteriormente, até retornar ao menu inicial
+    -   Retornar valores auxiliares da janela atual à outras classes do sistema
+    -   Atualizar texto do título da página
+    
+    Campos:
+    -   textoTituloPagina: texto para exibir no título da página
+    -   tituloPagina: objeto texto na interface onde o título é exibido
+    -   janela Inicio: referência ao objeto de janela de menu inicial
+    -   bottomMenu: referência ao painel de menu inferior
+    -   topMenu: referência ao painel de menu superior
+    -   perfilMenu: referência ao painel de menu de perfil
+    -   editarPerfilMenu: referência ao painel de menu de editar perfil
+    -   contratosMenu: referência ao painel de menu de contratos
+    -   mensagensMenu: referência ao painel de menu de mensagens
+    ***databridgeObj: referência ao objeto contendo o singleton databridge
+    ***databridge: referência ao singleton databridge
+    -   sTitulos: pilha de títulos de janelas visitadas
+    -   sJanelas: pilha de referências de janelas visitadas
+    -   sAux: pilha de valores auxiliares de janelas visitadas
+    ****************/
+
     string textoTituloPagina = "";
 
     [SerializeField]
@@ -31,6 +57,16 @@ public class MenuController : MonoBehaviour
     Stack<GameObject> sJanelas = new Stack<GameObject>();
     Stack<string> sAux = new Stack<string>();
     
+    
+    /****************
+    Método MonoBehaviour.Start()
+
+    Método herdado, executada no primeiro frame em que o objeto contendo o script atual estiver ativo, sempre após todas as execuções de MonoBehaviour.Awake()
+    Sobrecarregada para executar as operações desejadas para o preparo inicial do objeto
+
+    Resultado: 
+    -   inicializa a pilha com as informações para retornar à janela inicial
+    ****************/
     void Start()
     {
         databridge = databridgeObj.GetComponent<DataBridge>();
@@ -40,14 +76,32 @@ public class MenuController : MonoBehaviour
         sAux.Push("");
     }
     
+    /****************
+    Método MonoBehaviour.Update()
+
+    Método executada 60 vezes por segundo.
+    Sobrecarregada para executar operações associadas a atualizar valores na tela
+
+    Resultado: 
+    -   o título da página se mantém atualizado de acordo com o conteúdo de textoTituloPagina
+    ****************/
     void Update()
     {
         //manter título atualizado
         tituloPagina.GetComponent<Text>().text = textoTituloPagina;
-        
     }
     
-    //carrega valor auxiliar da nova página na pilha
+    /****************
+    Método IrNovoAux()
+
+    Empilha novo valor auxiliar na pilha de valores auxiliares à navegação
+
+    Parâmetros:
+    -   novoAux: novo valor a ser empilhado
+
+    Resultado: 
+    -   o valor é registrado na pilha. alternativamente, se o valor for -2, copia e empilha o valor inserido imediatamente antes
+    ****************/
     public void IrNovoAux(string novoAux)
     {
         //se auxiliar for -2, é sinal para usar mesmo auxiliar de página anterior
@@ -61,14 +115,35 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    //carrega texto a ser exibido no título da nova página na pilha
+    /****************
+    Método IrNovoTitulo()
+
+    Empilha novo titulo na pilha de titulos de janelas
+
+    Parâmetros:
+    -   novoTitulo: novo valor a ser empilhado
+
+    Resultado: 
+    -   o valor é registrado na pilha
+    ****************/
     public void IrNovoTitulo(string novoTitulo)
     {
         textoTituloPagina = novoTitulo;
         sTitulos.Push(novoTitulo);
     }
 
-    //descarta topo da pilha e acessa valores da página anteriormente acessada
+    /****************
+    Método IrJanelaAnterior()
+
+    Remove valor do topo de cada pilha (sAux, sJanelas e sTitulos) e os utiliza para navegar para janela anterior carregando os dados apropriados
+    Executa quaisquer métodos e funções relevantes para recarregar a página
+
+    Resultado: 
+    -   se já na página inicial, nada ocorre e cancela a execução do método
+    -   se saindo da janela de conversa, pausa a atualização de novas mensagens
+    -   a tela vista imediatamente antes da atual volta a ser exibida, exceto telas que se usou este método para sair
+    -   se neste processo a tela inicial for acessada novamente, as pilhas são resetadas
+    ****************/
     public void IrJanelaAnterior()
     {
         //não tem página anterior a atual se já estiver no menu inicial
@@ -131,11 +206,33 @@ public class MenuController : MonoBehaviour
         }
     }
 
+    /****************
+    Método IrNovaJanela()
+
+    Empilha nova janela na pilha de janelas visitadas
+
+    Parâmetros:
+    -   novaJanela: novo valor a ser empilhado
+
+    Resultado: 
+    -   uma referencia à nova janela é adicionada ao topo da pilha
+    ****************/
     public void IrNovaJanela(GameObject novaJanela)
     {
         sJanelas.Push(novaJanela);
     }
 
+    /****************
+    Método ResetNav()
+
+    Restaura os valores iniciais das pilhas
+
+    Parâmetros:
+    -   novoMenu: [DESCONTINUADO]
+
+    Resultado: 
+    -   as pilhas sTitulos, sJanelas e SAux possuem apenas os valores associados ao menu inicial ao fim da execução do método
+    ****************/
     public void ResetNav(int novoMenu)
     {
         sTitulos.Clear();
@@ -194,13 +291,27 @@ public class MenuController : MonoBehaviour
 
     }
 
-    //retorna título atualmente exibido para ser usado em outras classes
+    /****************
+    Funçãoi GetTitulo()
+
+    Retorna o título da tela atual para uso em outras classes
+
+    Resultado: 
+    -   retorna o título da tela atual
+    ****************/
     public string GetTitulo()
     {
         return sTitulos.Peek();
     }
 
-    //retorna valor auxiliar do topo da pilha para ser usado em outras classes
+    /****************
+    Funçãoi GetTitulo()
+
+    Retorna o valor auxiliar atual para uso em outras classes
+
+    Resultado: 
+    -   retorna o valor auxiliar atual
+    ****************/
     public string GetAux()
     {
         return sAux.Peek();

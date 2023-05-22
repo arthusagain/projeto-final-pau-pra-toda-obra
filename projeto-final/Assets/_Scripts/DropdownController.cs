@@ -5,6 +5,46 @@ using UnityEngine.UI;
 
 public class DropdownController : MonoBehaviour
 {
+    /****************
+    Clase DropdownController
+
+    Gerencia menus de dropdown de cidade e estado para exibirem apenas cidades pertencentes ao estado atualmente selecionado
+
+    Campos:
+    -   currentOption: opção atualmente selecionada
+    -   thisDropdown: componente Dropdown do objeto da interface contendo a seleção de estado
+    -   targetDropdown: componente Dropdown do objeto da interface contendo a seleção de cidades
+    -   targetGameObjectDropdown: objeto Unity contendo o dropdown de cidades
+    -   ListaAtual: lista de cidades do estado atualmente selecionado
+    -   ListaAC: lista de cidades do Acre
+    -   ListaAL: lista de cidades do Alagoas
+    -   ListaAM: lista de cidades do Amazonas
+    -   ListaAP: lista de cidades do Amapá
+    -   ListaBA: lista de cidades da Bahia
+    -   ListaCE: lista de cidades do Ceará
+    -   ListaDF: lista de cidades do Distrito Federal
+    -   ListaES: lista de cidades do Espírito Santo
+    -   ListaGO: lista de cidades de Goiais
+    -   ListaMA: lista de cidades do Maranhão
+    -   ListaMG: lista de cidades de Minas Gerais
+    -   ListaMS: lista de cidades do Mato Grosso do Sul
+    -   ListaMT: lista de cidades do Mato Grosso
+    -   ListaPA: lista de cidades do Pará
+    -   ListaPB: lista de cidades do Paraíba
+    -   ListaPE: lista de cidades do Pernambúco
+    -   ListaPI: lista de cidades do Piauí
+    -   ListaPR: lista de cidades do Paraná
+    -   ListaRJ: lista de cidades do Rio de Janeiro
+    -   ListaRN: lista de cidades do Rio Grande do Norte
+    -   ListaRO: lista de cidades da Rondônia
+    -   ListaRR: lista de cidades da Roraima
+    -   ListaRS: lista de cidades do Rio Grande do Sul
+    -   ListaSC: lista de cidades de Santa Catarina
+    -   ListaSE: lista de cidades do Sergipe
+    -   ListaSP: lista de cidades de São Paulo
+    -   ListaTO: lista de cidades do Tocantins
+    ****************/
+
     string currentOption;
     private Dropdown thisDropdown, targetDropdown;
 
@@ -42,12 +82,29 @@ public class DropdownController : MonoBehaviour
     List<string> ListaTO = new List<string> {"Abreulândia","Aguiarnópolis","Aliança do Tocantins","Almas","Alvorada","Ananás","Angico","Aparecida do Rio Negro","Aragominas","Araguacema","Araguaçu","Araguaína","Araguanã","Araguatins","Arapoema","Arraias","Augustinópolis","Aurora do Tocantins","Axixá do Tocantins","Babaçulândia","Bandeirantes do Tocantins","Barra do Ouro","Barrolândia","Bernardo Sayão","Bom Jesus do Tocantins","Brasilândia do Tocantins","Brejinho de Nazaré","Buriti do Tocantins","Cachoeirinha","Campos Lindos","Cariri do Tocantins","Carmolândia","Carrasco Bonito","Caseara","Centenário","Chapada de Areia","Chapada da Natividade","Colinas do Tocantins","Combinado","Conceição do Tocantins","Couto de Magalhães","Cristalândia","Crixás do Tocantins","Darcinópolis","Dianópolis","Divinópolis do Tocantins","Dois Irmãos do Tocantins","Dueré","Esperantina","Fátima","Figueirópolis","Filadélfia","Formoso do Araguaia","Fortaleza do Tabocão","Goianorte","Goiatins","Guaraí","Gurupi","Ipueiras","Itacajá","Itaguatins","Itapiratins","Itaporã do Tocantins","Jaú do Tocantins","Juarina","Lagoa da Confusão","Lagoa do Tocantins","Lajeado","Lavandeira","Lizarda","Luzinópolis","Marianópolis do Tocantins","Mateiros","Maurilândia do Tocantins","Miracema do Tocantins","Miranorte","Monte do Carmo","Monte Santo do Tocantins","Palmeiras do Tocantins","Muricilândia","Natividade","Nazaré","Nova Olinda","Nova Rosalândia","Novo Acordo","Novo Alegre","Novo Jardim","Oliveira de Fátima","Palmeirante","Palmeirópolis","Paraíso do Tocantins","Paranã","Pau D´arco","Pedro Afonso","Peixe","Pequizeiro","Colméia","Pindorama do Tocantins","Piraquê","Pium","Ponte Alta do Bom Jesus","Ponte Alta do Tocantins","Porto Alegre do Tocantins","Porto Nacional","Praia Norte","Presidente Kennedy","Pugmil","Recursolândia","Riachinho","Rio da Conceição","Rio Dos Bois","Rio Sono","Sampaio","Sandolândia","Santa fé do Araguaia","Santa Maria do Tocantins","Santa Rita do Tocantins","Santa Rosa do Tocantins","Santa Tereza do Tocantins","Santa Terezinha do Tocantins","São Bento do Tocantins","São Félix do Tocantins","São Miguel do Tocantins","São Salvador do Tocantins","São Sebastião do Tocantins","São Valério da Natividade","Silvanópolis","Sítio Novo do Tocantins","Sucupira","Taguatinga","Taipas do Tocantins","Talismã","Palmas","Tocantínia","Tocantinópolis","Tupirama","Tupiratins","Wanderlândia","Xambioá"};
     List<Dropdown.OptionData> OpcoesAtuais;
 
+    /****************
+    Método MonoBehaviour.Start()
+
+    Método herdado, executada no primeiro frame em que o objeto contendo o script atual estiver ativo, sempre após todas as execuções de MonoBehaviour.Awake()
+    Sobrecarregada para executar as operações desejadas para o preparo inicial do objeto
+
+    Resultado: 
+    -   thisDropdown e targetDropdown são inicializados com os componentes Dropdown, respectivamente, do dropdown de estado e do dropdown de cidade a serem associados
+    ****************/
     private void Start() {
         thisDropdown = GetComponent<Dropdown>();
         targetDropdown = targetGameObjectDropdown.GetComponent<Dropdown>();
     }
 
     //atualiza segundo menu dropdown de acordo com estado selecionado
+    /****************
+    Método RefreshDropdown()
+
+    Altera as opções do dropdown de cidade baseado no valor selecionado no dropdown de estado
+
+    Resultado: 
+    -   O dropdown cidade associado exibirá todas as cidades do estado selecionado no dropdown de estado, e apenas elas e a opção default "--Não selecionada--"
+    ****************/
     public void RefreshDropdown()
     {
 

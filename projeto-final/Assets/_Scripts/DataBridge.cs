@@ -15,17 +15,139 @@ using SimpleFileBrowser;
 
 public class DataBridge : MonoBehaviour
 {
+    /****************
+    Clase DataBridge
+
+    Singleton responsável por:
+    -   Ler, escrever, filtrar e remover dados do banco de dados
+    -   Atualizar telas com informações recebidas do banco
+    -   Adaptar entrada recebida do usuário para formato aceito pelo Firebase  
+    
+    Campos:
+    * Variáveis internas para realizar operações das funções:  
+    -   path: armazena temporariamente o endereço da imagem relevante para a tela atual, seja URL da imagem sendo publicada ou caminho para a imagem armazenada no banco de dados do Firebase
+    -   listenHandlerCooldown: booleano que sinaliza quando o sistema deve tentar atualizar mensagens de uma conversa, atualizado a cada alguns segundos
+    * Variáveis que armazenam dados dos objetos a serem publicados no banco
+    -   dataComission: dados sobre contrato
+    -   dataPerfil: dados sobre Perfil
+    -   ataMessage: dados sobre Message
+    -   dataContato: dados sobre Contato
+    -   dataAval: dados sobre Avaliacao
+    * Listas de paineis atualmente instanciados na tela
+    -   listaContatosInstanciados: lista dos contatos instanciados, na tela de contatos
+    -   listaComissionsUsuarioInstanciadas: lista dos contratos do usuário instanciadas, na tela de contratos do usuário X
+    -   listaComissionsInstanciadas: lista dos contratos instanciados, na tela de todos os contratos
+    -   listaMensagensInstanciadas: lista de mensagens, na tela de conversa com usuário X
+    -   listaConversasInstanciadas: lista de conversas, na tela de conversas ativas
+    -   listaAvaliacoesInstanciadas: lista de avaliações, na tela de avaliações
+    * Dicionários utilitários
+    -   dicNomesUsuarios: Relação e-mail->nome de usuários, evitando acessos excessivos ao banco de dados
+    * Referências básicas para uso do Firebase:
+    -   dbRef
+    -   storage
+    -   storageRef
+    *** Referencia dos demais singletons
+    -   globalMenu
+    -   authControllerObj
+    * Referencias dos elementos da tela de perfil
+    -   perfilPanel: a tela de exibição de perfil
+    -   perfNomeUser: texto que exibe nome do usuário dono do perfil
+    -   butPerfEditar: botão para navegar para tela de edição de perfil
+    -   butPerfConversar: botão para navbegar para tela de conversa com o dono deste perfil
+    -   perfIdade: texto que exibe idade do usuário dono do perfil
+    -   perfGenero: texto que exibe gênero do usuário dono do perfil
+    -   perfImagem: texto que exibe imagem do usuário dono do perfil
+    * Referencias dos elementos da tela de editar perfil
+    -   perfURLImagem: URL inserida pelo usuário indicando endereço web da imagem a ser associada ao perfil
+    -   perfEditarNome: campo de texto para editar nome de exibição do usuário
+    -   perfEditarIdade: campo de texto para editar idade do usuário a ser exibida no perfil
+    -   perfEditarGenero: campo de texto para editar gênero do usuário a ser exibido no perfil
+    -   perfEditarImagem: imagem de prévia sendo exibida na tela
+    * Referencias dos elementos da tela de contatos
+    -   contListaPanel: a tela de exibição da lista de formas de contato
+    -   contButtonText: botão para navegação. No perfil do próprio usuário abre tela de criação de novo contato, enquanto no perfil de outros usuários navega para tela de conversa
+    -   contEditarTipo: campo de texto para editar tipo de contato
+    -   contEditarValor: campo de texto para editar informações de contato
+    -   contNovoPainel: a tela de criação de novo contato
+    -   contatoTemplate: template de contato a ser copiado para a lista de contatos
+    * Referencias dos elementos das telas de conversas
+    -   msgListaPanel: a tela de conversa, onde os usuários trocam mensagens
+    -   conversaListaPanel: a tela de lista de conversas, onde são exibidos usuários com quem alguma mensagem ja foi trocada
+    -   messageTemplate: template de mensagem a ser copiado para a lista de mensagens
+    -   conversaTemplate: template de contato a ser copiado para a lista de conversas
+    -   newMensage: caixa de texto onde o usuário insere o texto da mensagem que deseja enviar
+    * Referencias dos elementos da tela de avaliação
+    -   avalSlider: slider usado pelo usuário para deixar sua avaliação
+    -   avalButton: botão para publicar a avaliação selecionada
+    -   avalDisplay: texto exibindo o valor atual selecionado da avaliação
+    -   avalTemplate: template de avaliação a ser copiado para a lista de avaliações
+    * Referencias dos elementos das telas de comissão e criação de comissões
+    -   comissionTemplate: template de contrato a ser copiado para a lista de contratos
+    -   comissionUsuarioTemplate: template de contrato a ser copiado para a lista de contratos do usuário
+    -   comissionListPanel: tela da lista de contratos
+    -   comissionListUsuarioPanel: tela da lista de contratos do usuário
+    -   newTitulo: campo de texto para titulo de novo contrato
+    -   newDescricao: campo de texto para descrição de novo contrato
+    -   newClasse: radiobuttons para selecionar se o contrato é uma "comissão" ou um "serviço"
+    -   newEstado: dropdown para selecionar o estado onde o contrato está sendo oferecida
+    -   newCidade: dropdown para selecionar a cidade onde o contrato está sendo oferecida, atualizado conforme estado
+    -   newFrequenciaUnico: radiobuttons para selecionar se o contrato ocorrerá apenas 1 vez ou se deseja-se repetir a operação semanalmente
+    -   newFrequenciaDom: checkbox para sinalizar que o contrato repetirá aos domingos
+    -   newFrequenciaSeg: checkbox para sinalizar que o contrato repetirá às segundas-feiras
+    -   newFrequenciaTer: checkbox para sinalizar que o contrato repetirá às terças-feiras
+    -   newFrequenciaQua: checkbox para sinalizar que o contrato repetirá às quartas-feiras
+    -   newFrequenciaQui: checkbox para sinalizar que o contrato repetirá às quintas-feiras
+    -   newFrequenciaSex: checkbox para sinalizar que o contrato repetirá às sextas-feiras
+    -   newFrequenciaSab: checkbox para sinalizar que o contrato repetirá aos sábados
+    -   newTipoObra: radiobuttons para selecionar se o contrato é um serviço de obra
+    -   newTipoFaxina: radiobuttons para selecionar se o contrato é um servi~ço de faxina
+    -   newTipoBaba: radiobuttons para selecionar se o contrato é um serviço de babá
+    -   newTipoOutro: radiobuttons para selecionar se o contrato é um outro tipo de serviço que as demais opções não cobrem
+    -   newPreco: campo de texto para inserir valor a ser oferecido ou cobrado pelo serviço
+    -   newURLImagem: URL da imagem que se deseja associar à comsision
+    -   newImagem: cimagem exibindo uma prévia baseado na URL inserida
+    * Referencias dos elementos das telas de informações aprofundadas do contrato
+    -   infoPanel: tela de informações sobre contrato
+    -   infoEstado: texto que exibe o estado onde o contrato está sendo oferecida
+    -   infoCidade: texto que exibe a cidade onde o contrato está sendo oferecida
+    -   infoFrequencia: texto que exibe a frequência com que se deseja realizar o contrato
+    -   infoTipo: texto que exibe o tipo do contrato
+    -   infoPreco: texto que exibe o valor cobrado ou oferecido pelo contrato
+    -   infoClasse: texto que exibe se o contrato é uma "comissão" ou um "serviço"
+    -   infoDescricao: texto que exibe a descrição do contrato
+    -   infoCriador: texto que exibe o nome do autor do contrato
+    -   infoImagem: imagem associada à contrato em sua criação
+    * Referencias dos elementos da tela de seleção de filtros de contratos
+    -   filterSort: dropdown para selecionar de que forma a lista será ordenada
+    -   filterClasse: booleano que sinaliza se as contratos a serem carregadas serão da classe "serviço" (True) ou "comissão" (false)
+    -   filterEstado: dropdown para selecionar o estado em que se tem interesse nas contrato
+    -   filterCidade: dropdown para selecionar a cidade em que se tem interesse nas contrato
+    -   filterFrequenciaUnico: checkbox para selecionar se desejar ver contrato de serviço único, não repetido semanalmente
+    -   filterFrequenciaSemanal: checkbox para selecionar se desejar ver contrato de serviço semanal
+    -   filterFrequenciaDom: checkbox para selecionar se desejar ver contrato repetidas aos domingos
+    -   filterFrequenciaSeg: checkbox para selecionar se desejar ver contrato repetidas às segundas-feiras
+    -   filterFrequenciaTer: checkbox para selecionar se desejar ver contrato repetidas às terças-feiras
+    -   filterFrequenciaQua: checkbox para selecionar se desejar ver contrato repetidas às quartas-feiras
+    -   filterFrequenciaQui: checkbox para selecionar se desejar ver contrato repetidas às quintas-feiras
+    -   filterFrequenciaSex: checkbox para selecionar se desejar ver contrato repetidas às sextas-feiras
+    -   filterFrequenciaSab: checkbox para selecionar se desejar ver contrato repetidas aos sábados
+    -   filterTipoObra: checkbox para selecionar se deseja-se ver contrato do tipo obra
+    -   filterTipoFaxina: checkbox para selecionar se deseja-se ver contrato do tipo faxina
+    -   filterTipoBaba: checkbox para selecionar se deseja-se ver contrato do tipo babá
+    -   filterTipoOutro: checkbox para selecionar se deseja-se ver contrato do tipo outros
+    -   filterPrecoMin: caixa de texto para inserir o menor preço, oferecido ou cobrado, que se aceita
+    -   filterPrecoMax: caixa de texto para inserir o maior preço, oferecido ou cobrado, que se aceita
+    ****************/
+
     string path;
     private bool listenHandlerCooldown = true;
  
-    //prefabs de dados de objetos a serem criados
     private Comission dataComission;
     private InfoUsuario dataPerfil;
     private Message dataMessage;
     private Contato dataContato;
     private Avaliacao dataAval;
 
-    //listas de prefabs instanciados em listas
     private List<GameObject> listaContatosInstanciados= new List<GameObject>();
     private List<GameObject> listaComissionsUsuarioInstanciadas= new List<GameObject>();
     private List<GameObject> listaComissionsInstanciadas= new List<GameObject>();
@@ -33,7 +155,6 @@ public class DataBridge : MonoBehaviour
     private List<GameObject> listaConversasInstanciadas = new List<GameObject>();
     private List<GameObject> listaAvaliacoesInstanciadas= new List<GameObject>();
 
-    //dictionary para guardar nomes que podem ser carregados nessa sessão
     private Dictionary<string,string> dicNomesUsuarios = new Dictionary<string, string>();
 
     [Header("Referencias Firebase")]
@@ -222,6 +343,16 @@ public class DataBridge : MonoBehaviour
     [SerializeField]
     private InputField filterPrecoMax;
 
+    /****************
+    Método MonoBehaviour.Start()
+
+    Método executada no primeiro frame em que o objeto contendo o script atual estiver ativo, sempre após todas as execuções de MonoBehaviour.Awake()
+    Sobrecarregada para executar as operações desejadas para o preparo inicial do objeto
+
+    Resultado: 
+    -   referências do firebase são inicializadas nas variáveis correspondetes
+    -   dicionário de nomes é inicializado com os nomes correntes dos usuários
+    ****************/
     private void Start() {
         //prepara referencias de endereços dos arquivos do aplicativo no servidor do firebase
         dbRef=FirebaseDatabase.DefaultInstance.RootReference;
@@ -239,6 +370,17 @@ public class DataBridge : MonoBehaviour
         */
     }   
 
+    /****************
+    Método MonoBehaviour.Update()
+
+    Método executada 60 vezes por segundo.
+    Sobrecarregada para executar operações associadas a atualizar valores na tela
+
+    Resultado: 
+    -   na tela de novo contrato, se frequência = único estiver selecionado, desseleciona e desabilita a possibilidade de selecionar dias da semana
+    -   na tela de novo contrato, se nenhum dia da semana for selecionado, automaticamente seleciona único
+    -   na tela de avaliação, atualiza o texto para exibir o valor selecionado no slider
+    ****************/
     private void Update() {
         //manutenção dos radiobuttons de frequencia na tela de novo contrato
         if(newFrequenciaUnico.isOn)
@@ -259,7 +401,14 @@ public class DataBridge : MonoBehaviour
         avalDisplay.text = avalSlider.value.ToString("F1");
     }
 
-    //prepara dicionário com emails e nomes de usuários para uso nas demais funções sem demandar constantes acessos ao banco de dados para recuperar nomes
+    /****************
+    Método PrepareDicNomes()
+
+    Atualiza o dicionário dicNomes para armazenar uma relação e-mail -> nome de exibição do usuário
+
+    Resultado: 
+    -   dicNomes passa a armazenar um dicionário tal que cada entrada relaciona e-mail -> nome de exibição
+    ****************/
     public void PrepareDicNomes()
     {
         List<DataSnapshot> listaPerfis = new List<DataSnapshot>();
@@ -286,8 +435,22 @@ public class DataBridge : MonoBehaviour
         });
     }
 
-    //métodos para salvar dados
-    //verifica se campos obrigatórios de novo contrato estão preenchidos, e salva no banco caso sim
+    //Métodos para salvar dados
+    /****************
+    Método SalvarComissao()
+
+    Verifica se os valores inseridos são válidos. Se sim, salva dados no banco como novo contrato
+
+    Entrada:
+    -   newTitulo: titulo dado à novo contrato
+    -   newEstado: estado onde novo contrato se localiza
+    -   newCidade: cidade onde novo contrato se localiza
+    -   newPreco: preço inicialmente oferecido ou cobrado pelo serviço anunciado no contrato
+
+    Resultado: 
+    -   se algum dos dados do contrato estiver vazio, aborta a operação e exibe mensagem "Alguns campos obrigatórios não foram preenchidos"
+    -   se os dados inseridos forem válidos, executa a corrotina CreateComission(), que salva os dados inseridos em novo contrato no banco de dados
+    ****************/
     public void SalvarComissao()
     {
         if(newTitulo.text.Equals("")||newEstado.value == 0||newCidade.value == 0||newPreco.text.Equals("")||StringToFloat(newPreco.text)<=0)
@@ -298,13 +461,37 @@ public class DataBridge : MonoBehaviour
         StartCoroutine(CreateComission());
     }
 
-    //salva avaliação no banco 
+    /****************
+    Método SalvarAvaliacao()
+
+    Executa corrotina para salvar avaliação no banco de dados
+
+    Entrada:
+    -   avalSlider: slider em que o usuário selecionou o valor da avaliação que deseja dar ao outro usuário
+
+    Resultado: 
+    -   executa a corrotina CreateAval(), que salva o valor inserido em um objeto avaliacao no banco de dados
+    ****************/
     public void SalvarAvaliacao()
     {
         StartCoroutine(CreateAval(globalMenu.GetComponent<MenuController>().GetAux()));
     }
     
-    //verifica se campos obrigatórios de novo perfil estão preenchidos, e salva no banco caso sim
+    /****************
+    Método SalvarPerfil()
+
+    Verifica se um nome foi inserido na edição de perfil. Se sim, cria e salva seu perfil no sistema, caso seja um novo usuário, ou apenas atualiza seus dados caso já tenha perfil
+
+    Entrada:
+    -   perfEditarNome: caixa de texto em que o usuário escreve o nome de exibição desejado
+    -   perfEditarIdade: caixa de texto em que o usuário escreve a idade
+    -   perfEditarGenero: caixa de texto em que o usuário escreve o ênero
+
+    Resultado: 
+    -   se o nome não for preenchido, exibe o erro "Nome obrigatório!" na tela
+    -   se os dados inseridos forem válidos, executa a corrotina CreateInfoUsuario(), que salva os dados inseridos em um objeto perfil no banco de dados
+    
+    ****************/
     public void SalvarPerfil()
     {
         if(perfEditarNome.text.Equals(""))
@@ -315,7 +502,21 @@ public class DataBridge : MonoBehaviour
         StartCoroutine(CreateInfoUsuario(perfEditarNome.text, perfEditarIdade.text, perfEditarGenero.text));
     }
 
-    //verifica se campos obrigatórios de novo contato estão preenchidos, e salva no banco caso sim
+    /****************
+    Método SalvarContato()
+
+    Verifica se tipo e informações de contato fram inseridos. Se sim, salva objeto contato no banco de dados. Senão, exibe erro adequado
+
+    Entrada:
+    -   contEditarTipo: caixa de texto em que o usuário escreve o tipo de contato sendo adicionado
+    -   contEditarValor: caixa de texto em que o usuário escreve as informações do contato sendo adicionado
+
+    Resultado: 
+    -   se o tipo de contato não foi preenchido, exibe "Tipo de contato obrigatório!" na tela
+    -   se as informações de contato não foram preenchidas, exibe "Informação de contato obrigatória!" na tela
+    -   se os dados inseridos forem válidos, executa a corrotina CreateContato(), que salva os dados inseridos em um objeto contato no banco de dados
+    
+    ****************/
     public void SalvarContato()
     {
         if(contEditarTipo.text.Equals(""))
@@ -331,7 +532,18 @@ public class DataBridge : MonoBehaviour
         StartCoroutine(CreateContato(contEditarTipo.text, contEditarValor.text));
     }
 
-    //verifica se mensagem a ser enviada não está vazia, salvando no banco caso tenha conteúdo válido
+    /****************
+    Método EnviarMensagem()
+
+    Verifica se a caixa de nova mensagem foi preenchida. Se sim, cria nova mensagem na conversa entre usuário atual e seu destinatário
+
+    Entrada:
+    -   newMensagem: caixa de texto em que o usuário escreve a mensagem que deseja enviar
+
+    Resultado: 
+    -   se a caixa de mensagem estiver vazia, exibe o erro "A mensagem não pode ser vazia!"
+    -   caso contrário, executa a corrotina CreateMensagem(), que salva no banco de dados um objeto mensagem na conversa entre o usuário e seu destinatário
+    ****************/
     public void EnviarMensagem()
     {
         if (newMensagem.text.Equals(""))
@@ -344,8 +556,21 @@ public class DataBridge : MonoBehaviour
 
     }
 
-    //métodos de atualzação de dados exibidos
-    //atualiza lista de contatos do usuário idUsuario
+    //Métodos de atualzação de dados exibidos
+    /****************
+    Método RefreshContatoList()
+
+    Executado na tela de lista de formas de contato de um usuário
+    Lê, no banco de dados, as informações de contato que o usuário publicou no sistema, e instancia cada elemento na interface como um cartão em uma lista
+    Adapta conteudo dos elementos instanciado, exibindo a opção de deletar caso o usuário atual seja o autor
+
+    Parâmetros:
+    -   idUsuário: identificador do usuário cujas informações de contato se deseja carregar. Se for -2, carrega o usuário atual no sistema
+
+    Resultado: 
+    -   Para cada contato que o usuário de id = idUsuario (ou usuário atual, caso idUsuario = -2), um cartão será exibido na lista ao centro da tela contendo suas informações 
+    -   Se o usuário atual for autor dos contatos, cada cartão tem um botão associado para deletar seu respectivo contato do sistema
+   ****************/
     public void RefreshContatoList(string idUsuario)
     {
         //atualiza dicionário de nomes caso nome de algum usuário tenha sido modificado desde o inicio da sessão
@@ -357,7 +582,7 @@ public class DataBridge : MonoBehaviour
             idUsuario=globalMenu.GetComponent<MenuController>().GetAux();
         }
 
-        //remove dados instanciados na ultima chamada da função
+        //remove dados instanciados na ultima chamada do método
         for (int i = 0; i<listaContatosInstanciados.Count;)
         {
             GameObject currentObj = listaContatosInstanciados[i];
@@ -411,13 +636,45 @@ public class DataBridge : MonoBehaviour
         });
     }
 
-    //atualiza lista de contratos dependendo se está buscando "Serviço" ou "Comissão"
+    /****************
+    Método RefreshComissionList()
+
+    Executado na tela de lista de contratos
+    Lê, no banco de dados, as informações de contratos publicados no sistema, e instancia cada elemento na interface como um cartão em uma lista
+
+    Parâmetros:
+    -   classeComissaoRefreshed: string que identifica a classe de contrato a ser filtrada ("Servico", "Comissão", ou "-2"). Se -2, usa o utl
+
+    Entrada:
+    -   filterEstado: filtro selecionado no dropdown de filtrar por estado. Por default, exibe todos
+    -   filterCidade: filtro selecionado no dropdown de filtrar por cidade. Por default, exibe todos
+    -   filterClasse: filtro booleano, sinaliza "True" quando filtrando contratos da classe "Serviço", e "False" quando filtrando por "Comissão". O valor adequado é sempre atualizado externamente antes de se fazer a chamada do método RefreshComissionList()
+    -   filterFrequenciaUnico: filtro booleano, sinalizando se deseja exibir contratos que não se repetem. Default True
+    -   filterFrequenciaSemanal: filtro booleano, sinalizando se deseja exibir contratos com frequencia semanal. Default True
+    -   filterFrequenciaDom: filtro booleano, sinalizando se deseja exibir contratos repetidas aos domingos. Default True
+    -   filterFrequenciaSeg: filtro booleano, sinalizando se deseja exibir contratos repetidas às segundas-feiras. Default True
+    -   filterFrequenciaTer: filtro booleano, sinalizando se deseja exibir contratos repetidas às terças-feiras. Default True
+    -   filterFrequenciaQua: filtro booleano, sinalizando se deseja exibir contratos repetidas às quartas-feiras. Default True
+    -   filterFrequenciaQui: filtro booleano, sinalizando se deseja exibir contratos repetidas às quintas-feiras. Default True
+    -   filterFrequenciaSex: filtro booleano, sinalizando se deseja exibir contratos repetidas às sextas-feiras. Default True
+    -   filterFrequenciaSab: filtro booleano, sinalizando se deseja exibir contratos repetidas aos sábados. Default True
+    -   filterPrecoMax: filtro digitado no campo para filtrar valor máximo cobrado/oferecido no contrato. Por default não limita valor máximo
+    -   filterPrecoMin: filtro digitado no campo para filtrar valor mínimo cobrado/oferecido no contrato. Por default é 0
+    -   filterTipoBaba: filtro booleando, sinalizando se deseja exibir contratos do tipo "babá"
+    -   filterTipoFaxina: filtro booleando, sinalizando se deseja exibir contratos do tipo "faxina"
+    -   filterTipoObra: filtro booleando, sinalizando se deseja exibir contratos do tipo "obra"
+    -   filterTipoOutro: filtro booleando, sinalizando se deseja exibir contratos do tipo "outro"
+    -   filterSort: filtro selecionado no dropdown para ordenação de exibição dos dados carregados
+
+    Resultado: 
+    -   Para cada contrato correspondente aos filtros, um cartão será exibido na lista ao centro da tela contendo suas informações 
+    ****************/
     public void RefreshComissionList(string classeComissaoRefreshed)
     {
         //atualiza dicionário de nomes caso nome de algum usuário tenha sido modificado desde o inicio da sessão
         PrepareDicNomes();
         
-        //se classeComissaoRefreshed == -2, copia classe de contrato utilizada na ultima chamada da função.
+        //se classeComissaoRefreshed = -2, copia classe de contrato utilizada na ultima chamada do método.
         if(classeComissaoRefreshed.Equals("-2"))
         {
             if (filterClasse)
@@ -433,7 +690,7 @@ public class DataBridge : MonoBehaviour
             filterClasse = classeComissaoRefreshed.Equals("Serviço");
         }
 
-        //remove dados instanciados na ultima chamada da função
+        //remove dados instanciados na ultima chamada do método
         for (int i = 0; i<listaComissionsInstanciadas.Count;)
         {
             GameObject currentObj = listaComissionsInstanciadas[i];
@@ -675,14 +932,24 @@ public class DataBridge : MonoBehaviour
         });
     }
 
-    //atualiza lista de contratos atualmente publicados do último perfil acessado
+    /****************
+    Método RefreshComissionList()
+
+    Executado na tela de lista de contratos publicadas por um usuário especifico, em seu perfil
+    Lê, no banco de dados, as informações de de contratos publicadas no sistema pelo usuário dono do perfil sendo acessado, e instancia cada elemento na interface como um cartão em uma lista
+    Também torna possivel um usuário excluir contrato de sua autoria
+
+    Resultado: 
+    -   Para cada contrato criada pelo usuário (dono do perfil sendo acessado), um cartão será exibido na lista ao centro da tela contendo suas informações 
+    -   Se o dono do perfil sendo visualizado é o usuário atual, um botão é disponibilizado em cada cartão para excluir o contrato associada
+    ****************/
     public void RefreshComissionUsuarioList()
     {
         //atualiza dicionário de nomes caso nome de algum usuário tenha sido modificado desde o inicio da sessão
         PrepareDicNomes();
         string idUsuario = globalMenu.GetComponent<MenuController>().GetAux();
         
-        //remove dados instanciados na ultima chamada da função
+        //remove dados instanciados na ultima chamada do método
         for (int i = 0; i<listaComissionsUsuarioInstanciadas.Count;)
         {
             GameObject currentObj = listaComissionsUsuarioInstanciadas[i];
@@ -784,7 +1051,17 @@ public class DataBridge : MonoBehaviour
         });
     }
 
-    //atualiza lista de avaliações do usuáro do último perfil acessado
+    /****************
+    Método RefreshAvaliacaoList()
+
+    Executado na tela de lista de avaliações publicadas sobre um usuário especifico, em seu perfil
+    Lê, no banco de dados, as informações de avaliações direcionadas ao usuário dono do perfil sendo acessado, e instancia cada elemento na interface como um cartão em uma lista
+    Se o dono do perfil sendo visualizado não é o usuário atual, o método também habilita o painel que permite deixar uma avaliação
+
+    Resultado: 
+    -   Para cada avaliação feita ao serviço do usuário(dono do perfil sendo acessado), um cartão será exibido na lista ao centro da tela contendo suas informações 
+    -   Se o usuário atual não for dono do perfil sendo acessado, um painel será exibido na porção inferior da tela, disponibilizando o botão e o slider 
+    ****************/
     public void RefreshAvaliacaoList()
     {
         //atualiza dicionário de nomes, caso algum usuário tenha alterado seu nome desde o início da sessão
@@ -800,7 +1077,7 @@ public class DataBridge : MonoBehaviour
             avalButton.SetActive(true);
         }
         
-        //limpa dados instanciados na última execução desta função
+        //limpa dados instanciados na última execução deste método
         for (int i = 0; i<listaAvaliacoesInstanciadas.Count;)
         {
             GameObject currentObj = listaAvaliacoesInstanciadas[i];
@@ -838,7 +1115,18 @@ public class DataBridge : MonoBehaviour
         });
     }
 
-    //atualiza lista de mensagens trocadas entre o usuário atual e o usuário destinatarioId
+    /****************
+    Método RefreshMensagemList()
+
+    Executado na tela de conversa
+    Lê, no banco de dados, as mensagens trocadas entre o usuário atual e o usuário alvo (identificado por destinatarioId) e instancia cada elemento na interface como um cartão em uma lista
+ 
+    Parâmetros:
+    -   destinatarioId: identificador do usuário destinatário
+
+    Resultado: 
+    -   Para cada mensagem trocada entre os usuários, um cartão será exibido na lista ao centro da tela contendo suas informações
+    ****************/
     public void RefreshMensagemList(string destinatarioId)
     {
         //atualiza dicionário de nomes, caso algum usuário tenha mudado de nome durante a sessão atual
@@ -855,7 +1143,7 @@ public class DataBridge : MonoBehaviour
 
         }
 
-        //remove mensagens instanciadas na última execução desta função
+        //remove mensagens instanciadas na última execução deste método
         for (int i = 0; i<listaMensagensInstanciadas.Count;)
         {
             GameObject currentObj = listaMensagensInstanciadas[i];
@@ -899,13 +1187,21 @@ public class DataBridge : MonoBehaviour
         });
     }
 
-    //atualiza lista de usuários com quem o usuário atual já começou uma conversa, recebendo ou enviando qualquer mensagem
+    /****************
+    Método RefreshConversasList()
+
+    Executado na tela de lista de conversas
+    Lê, no banco de dados, com que usuários o usuário atual já iniciou uma conversa, e instancia cada elemento na interface como um cartão em uma lista
+ 
+    Resultado: 
+    -   Para cada conversa iniciada contendo o usuário, um cartão será exibido na lista ao centro da tela contendo o nome do interlocutor
+    ****************/
     public void RefreshConversasList()
     {
         //atualiza dicionário de nomes de usuários, para caso algum usuário tenha modificado seu nome durante a sessão atual
         PrepareDicNomes();
 
-        //remove instancias criadas na última execução desta função
+        //remove instancias criadas na última execução deste método
         for (int i = 0; i<listaConversasInstanciadas.Count;)
         {
             GameObject currentObj = listaConversasInstanciadas[i];
@@ -950,7 +1246,19 @@ public class DataBridge : MonoBehaviour
         });
     }
     
-    //carrega dados do contrato keyContrato
+    /****************
+    Método CarregaInfoContrato()
+
+    Executado na tela de informações de contrato.
+    Carrega os dados inseridos na criação do contrato para serem exibidos na tela
+
+    Parâmetros:
+    -   keyContrato: chave única indentificadora do contrato cujas informações se deve carregar
+    -   isRetorno: flag booleana. False se o método for executado a partir da lista de contratos ou da lista de contratos do usuário. True caso contrario, implicando que a página está sendo revisitada a partir da funcionalidade de voltar para tela anterior
+
+    Resultado: 
+    -   As informações do contrato são carregadas nos respectivos campos
+    ****************/
     public void CarregaInfoContrato(string keyContrato, bool isRetorno)
     {
         //atualiza dicionário de nomes, caso algum usuário tenha atualizado seu nome durante a sessão atual
@@ -1037,7 +1345,18 @@ public class DataBridge : MonoBehaviour
         });
     }
 
-    //carrega dados do perfil de idUsuario
+    /****************
+    Método CarregarPerfil()
+
+    Executado na tela de informações de perfil.
+    Carrega os dados inseridos na criação do perfil para serem exibidos na tela
+
+    Parâmetros:
+    -   idUsuario: chave única indentificadora do usuário cujas informações se deve carregar
+
+    Resultado: 
+    -   As informações do perfil são carregadas nos respectivos campos
+    ****************/
     public void CarregarPerfil(string idUsuario)
     {
         //se idUsuario = -1, carrega dados do perfil do usuário atual e registra na pilha de navegação
@@ -1104,17 +1423,30 @@ public class DataBridge : MonoBehaviour
 
     }
 
-    //corrotinas
-    //espera 0.1s entre tentativas de atualizar lista de mensagens atraves do listener
+    //Corrotinas
+    /****************
+    Corrotina CooldownHandler()
+
+    Espera 0.1s antes de tentar atualizar lista de mensagens
+
+    Entrada:
+    -   listenHandlerCooldown: flag usada pelo método ConversaListenHandler() para atrasar a atualização da lista de mensagens para não ser atualizada mais que 1 vez a cada 0.1s.
+
+    Resultado: 
+    -   Após o atraso, atualiza lista de mensagens da conversa atual
+    ****************/
     IEnumerator CooldownHandler()
     {
         yield return new WaitForSeconds((float)0.1);
+
+        //atualiza lista de mensagens após o atraso
         listenHandlerCooldown = true;
+        RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
     }
 
     //abre caixa de dialogo para navegar nos arquivos do dispositivo e escolher imagem. carrega imagem escolhida como textura de targetRawImage
     /*IEnumerator ShowLoadDialogCoroutine(RawImage targetRawImage)
-    {//função não usada pois estava dando problemas com android. mantida no comentário para possiveis melhorias em versões futuras do app
+    {//método não usado pois estava dando problemas com android. mantida no comentário para possiveis melhorias em versões futuras do app
         yield return FileBrowser.WaitForLoadDialog( FileBrowser.PickMode.FilesAndFolders, false, null, null, "Escolha uma imagem para inserir", "Selecionar" );
         
         if( FileBrowser.Success )
@@ -1133,7 +1465,19 @@ public class DataBridge : MonoBehaviour
         }
     }*/
 
-    //carrega imagem armazenada no servidor e insere como textura na imagem alvo targetImage
+    /****************
+    Corrotina LoadImagemUrl()
+
+    Carrega imagem de uma url e insere como textura na imagem alvo targetImage
+
+    Parâmetros:
+    -   mediaUrl: url da imagem a ser carregada
+    -   targetImage: objeto RawImage exibido na tela, onde se deseja carregar a imagem
+
+    Resultado: 
+    -   targetImage passa a exibir a imagem indicada na url inserida
+    -   Se ocorrer uma falha no acesso à imagem, um erro é exibido e a operação é cancelada
+    ****************/
     IEnumerator LoadImagemUrl (string mediaUrl, RawImage targetImage)
     {
         //carrega imagem do endereço web
@@ -1152,6 +1496,33 @@ public class DataBridge : MonoBehaviour
     }
 
     //salva contrato e sua imagem associada no banco
+    /****************
+    Corrotina CreateComission()
+
+    Salva informações de um contrato válido e sua imagem associada no banco de dados
+
+    Entrada:
+    -   newTitulo: titulo dado ao novo contrato
+    -   newDescricao: descrição dada ao novo contrato
+    -   newEstado: estado onde novo contrato se localiza
+    -   newCidade: cidade onde novo contrato se localiza
+    -   newPreco: preço inicialmente oferecido ou cobrado pelo serviço anunciado no contrato
+    -   newFrequenciaDom: booleano True se o contrato se repete aos domingos
+    -   newFrequenciaSeg: booleano True se o contrato se repete às segundas-feiras
+    -   newFrequenciaTer: booleano True se o contrato se repete às terças-feiras
+    -   newFrequenciaQua: booleano True se o contratose repete às quartas-feiras
+    -   newFrequenciaQui: booleano True se o contrato se repete às quintas-feiras
+    -   newFrequenciaSex: booleano True se o contrato se repete às sextas-feiras
+    -   newFrequenciaSab: booleano True se o contrato se repete aos sábados
+    -   newTipoObra: booleano True se o contrato for referênte a um serviço de obra
+    -   newTipoFaxina: booleano True se o contrato for referênte a um serviço de obra
+    -   newTipoBaba: booleano True se o contrato for referênte a um serviço de obra
+    -   newImagem: RawImage exibindo a imagem carregada pelo usuário
+
+    Resultado: 
+    -   Uma cópia da imagem newImagem passa a existir no banco de dados, caso sua transferencia tenha sucesso. Em caso de falha, uma mensagem de erro é exibida ao usuário e o contrato é salvo sem imagem.
+    -   Salva as informações inseridas como um novo contrato no banco de dados. Se houver erro na transferencia da imagem, salva o contrato como sem imagem
+    ****************/
     IEnumerator CreateComission()
     {
         //salva imagem
@@ -1242,12 +1613,26 @@ public class DataBridge : MonoBehaviour
         else{
             //contrato publicado com sucesso. volta a lista de contratos anterior
             RefreshComissionList("-2");
-            ClearImageField();
+            path = "";
 
         }
     }
 
-    //salva mensagem trocada entre usuários e registra o início da conversa da dupla caso ainda não tenha sido iniciada
+    /****************
+    Corrotina CreateMensagem()
+
+    Salva nova mensagem enviada no banco de dados como nova mensagem 
+    Se o remetente e o destinatário nunca tiverem conversado pelo aplicativo anteriormente, também salva a nova conversa
+
+    Parâmetros:
+    -   destino: identificador do usuário destinatário da mensagem
+    -   conteudo: o texto do conteudo da mensagem
+
+    Resultado: 
+    -   a mensagem é salva na conversa entre os dois usuários
+    -   a lista de mensagens é atualizada para exibir a mensagem enviada
+    -   o campo de texto é esvaziado para evitar reenvio da mesma mensagem multiplas vezes
+    ****************/
     IEnumerator CreateMensagem(string destino, string conteudo)
     {
         //cria objeto Message com valores inseridos e converte para dicionário
@@ -1282,7 +1667,23 @@ public class DataBridge : MonoBehaviour
         newMensagem.text = "";
     }
 
-    //salva perfil de usuário e sua imagem associada no banco
+    /****************
+    Corrotina CreateInfoUsuario()
+
+    Salva perfil de usuário e sua imagem associada no banco de dados, atualizando suas informações caso ja exista
+
+    Parâmetros:
+    -   newPerfNome: texto inserido como novo nome de exibição do usuário
+    -   newPerfIdade: texto inserido como nova idade do usuário
+    -   newPerfGenero: texto inserido como novo gênero do usuário
+    -   perfEditarImagem: RawImage contendo a imagem carregada que se deseja associar ao perfil
+
+    Resultado: 
+    -   se uma imagem foi carregada, ela será salva no banco de dados e associada ao perfil. se ocorrer falha nessa operação um erro é exibido na tela e o perfil é salvo sem imagem
+    -   se o usuário não tinha um perfil antes, salva seu perfil no banco de dados
+    -   se o usuário já tinha um perfil, atualiza suas informações no perfil salvo no banco de dados
+    -   se ocorrer uma falha nessa operção, uma mensagem de erro é exibida e a operação é cancelada
+    ****************/
     IEnumerator CreateInfoUsuario(string newPerfNome, string newPerfIdade, string newPerfGenero)
     {
         //salva imagem
@@ -1317,13 +1718,25 @@ public class DataBridge : MonoBehaviour
         else{
             //perfil salvo com sucesso. atualiza tela de perfil e dicionário de nomes, e limpando path da image para uploads futuros
             CarregarPerfil(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
-            ClearImageField();
+            path = "";
             globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
             PrepareDicNomes();
         }
     }
     
-    //salva contato no banco
+    /****************
+    Corrotina CreateContato()
+
+    Salva contato no banco de dados
+
+    Parâmetros:
+    -   newContatoTipo: tipo do novo contato, digitado pelo usuário
+    -   newContatoValor: informações do novo contato, digitado pelo usuário
+
+    Resultado: 
+    -   um novo contato será salvo no banco de dados com as informações inseridas
+    -   se ocorrer um erro, uma mensagem é exibida e a operação é cancelada
+    ****************/
     IEnumerator CreateContato(string newContatoTipo, string newContatoValor)
     {
         //cria objeto Contato com valores inseridos, converte em dicionário e publica no caminho adequado no servidor firebase
@@ -1343,7 +1756,18 @@ public class DataBridge : MonoBehaviour
         }
     }
 
-    //salva avaliação do usuário atual sobre usuário avaliadoId no banco
+    /****************
+    Corrotina CreateAval()
+
+    Salva avaliação no banco de dados
+
+    Parâmetros:
+    -   avaliadoId: identificador unico do usuário sendo avaliado
+
+    Resultado: 
+    -   uma nova avaliação sobre o usuário alvo é salva no banco de dados
+    -   se ocorrer um erro, uma mensagem é exibida e a operação é cancelada
+    ****************/
     IEnumerator CreateAval(string avaliadoId)
     {
         //cria objeto Avaliacao com valor inserido e usuários associados, converte para dicionário e salva no local adequado no servidor 
@@ -1362,8 +1786,16 @@ public class DataBridge : MonoBehaviour
         }
     }
 
-    //métodos utilitários
-    //adapta botão da página de contatos para exibir texto correto dependendo se a lista pertence ao usuário atual ou a outro usuário
+    //Métodos e funções utilitários/
+    /****************
+    Método SetContatoButton()
+
+    Adapta texto do botão da página de contatos dependendo se a lista pertence ao usuário atual ou a outro usuário
+
+    Resultado: 
+    -   se a lista de contatos sendo vista pertence ao usuário atual, o botão passa a exibir o texto "Adicionar forma de contato"
+    -   se a lista de contatos sendo vista pertence a outro usuário que não o usuário atual, o botão passa a exibir o texto "Ir para conversa"
+    ****************/
     public void SetContatoButton()
     {
         if(globalMenu.GetComponent<MenuController>().GetAux().Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
@@ -1375,7 +1807,15 @@ public class DataBridge : MonoBehaviour
         }
     }
 
-    //habilita adição de novo contato, se na própria lista de contatos, ou vai para conversa, se na lista de outro usuário
+    /****************
+    Método ContatoButtonHandler()
+
+    Adapta função do botão da página de contatos dependendo se a lista pertence ao usuário atual ou a outro usuário
+
+    Resultado: 
+    -   se a lista de contatos sendo vista pertence ao usuário atual, pressionar o botão passa a habilitar o painel de adicionar novo contato
+    -   se a lista de contatos sendo vista pertence a outro usuário que não o usuário atual, pressionar o botão passa a navegar para a tela de conversa com ele
+    ****************/
     public void ContatoButtonHandler()
     {
         if(globalMenu.GetComponent<MenuController>().GetAux().Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
@@ -1395,7 +1835,25 @@ public class DataBridge : MonoBehaviour
         }
     }
 
-    //atualiza checkboxes da janela de filtros, desativando caixas de dias da semana se a opção for desselecionada e reabilitando quando marcada novamente
+    /****************
+    Método ReactivateFilterHandler()
+
+    Atuali1za checkboxes da janela de filtros, desativando caixas de dias da semana se a opção for desselecionada e reabilitando quando marcada novamente
+
+    Entrada:
+    -   filterFrequenciaSemanal: valor da checkbox que filtra contratos que se repetem semanalmente 
+    -   filterFrequenciaDom: valor da checkbox que filtra contratos que se repetem aos domingos
+    -   filterFrequenciaSeg: valor da checkbox que filtra contratos que se repetem às segundas-feiras
+    -   filterFrequenciaTer: valor da checkbox que filtra contratos que se repetem às terças-feiras
+    -   filterFrequenciaQua: valor da checkbox que filtra contratos que se repetem às quartas-feiras
+    -   filterFrequenciaQui: valor da checkbox que filtra contratos que se repetem às quintas-feiras
+    -   filterFrequenciaSex: valor da checkbox que filtra contratos que se repetem às sextas-feiras
+    -   filterFrequenciaSab: valor da checkbox que filtra contratos que se repetem aos sábados
+
+    Resultado: 
+    -   quando a caixa filterFrequenciaSemanal for habilitada, habilita todas as checkboxes de filtros por dias da semana e torna seus valores True
+    -   quando a caixa filterFrequenciaSemanal for desabilitada, desabilita todas as checkboxes de filtros por dias da semana e torna seus valores False
+    ****************/
     public void ReactivateFilterHandler()
     {
         filterFrequenciaDom.isOn=filterFrequenciaSemanal.isOn;
@@ -1414,18 +1872,33 @@ public class DataBridge : MonoBehaviour
         filterFrequenciaSab.interactable = filterFrequenciaSemanal.isOn;
     }
 
-    //listener espera por atualizações na lista de mensagens enquanto usuário está nela
+    /****************
+    Método ConversaListenHandler()
+
+    Método executado em resposta à adição de nova mensagem na conversa no banco de dados
+
+    Parâmetros:
+    -   o:  Parâmetro herdado do evento Firebase "ChildAdded". Não utilizado nessa aplicação.
+    -   args:  Parâmetro herdado do evento Firebase "ChildAdded". Não utilizado nessa aplicação.
+
+    Entrada:
+    -   listenHandlerCooldown: booleano que sinaliza True quando se passaram 0.1s desde a última execução do método
+
+    Resultado: 
+    -   se uma nova mensagem foi criada a mais que 0.1s na conversa atual, aguarda 0.1s antes de atualizar a lista de mensagens
+    ****************/
     public void ConversaListenHandler(object o, ChildChangedEventArgs args)
     {
-        //aguarda 0.1s entre atualizações para evitar acessos excessivos ao banco
+        //só atualiza se tiverem passado 0.1s entre atualizações para evitar acessos excessivos ao banco
         if (listenHandlerCooldown)
         {
-            RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
+            //RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
             Debug.Log("Nova mensagem. Refresh conversa com "+globalMenu.GetComponent<MenuController>().GetAux());
             listenHandlerCooldown = false;
             StartCoroutine(CooldownHandler());
         }
     }
+
     //abre explorador de arquivos para selecionar imagem a ser salva no sistema
     /*public void OpenFileExplorer(RawImage targetRawImage)
     {//função não usada pois estava dando problemas com android. mantida no comentário para possiveis melhorias em versões futuras do app
@@ -1433,7 +1906,21 @@ public class DataBridge : MonoBehaviour
         return;
     }*/
 
-    //carrega imagem da url inserida na caixa de texto da página idpagina e insere conteudo na rawimage da pagina. idpagina 1 = perfil; 2= contrato
+    /****************
+    Método SalvarImagemHandler()
+
+    Verifica se a URL usada para um upload de imagem é válida, carregando a prévia no objeto RawImage associado da tela caso positivo
+
+    Parâmetros:
+    -   idPagina: numeração usada para identificar página em que o upload da imagem está sendo feito. 1= edição de perfil. 2= edição de contrato. Qualquer outro valor exibe erro e cancela a operação
+
+    Entrada:
+    -   perfURLImagem: caixa de texto onde é inserida a url da imagem a ser transferida para perfil
+    -   newURLImagem: caixa de texto onde é inserida a url da imagem a ser transferida para contrato
+
+    Resultado: 
+    -   se a url endereça uma imagem .png, o objeto rawImage da tela atual passa a exibir a imagem na url.
+    ****************/
     public void SalvarImagemHandler(int idPagina)
     {
         switch (idPagina)
@@ -1465,12 +1952,38 @@ public class DataBridge : MonoBehaviour
     }
 
     //limpa path para evitar sujeira nas publicações de arquivos
-    public void ClearImageField()
+    /*public void ClearImageField()
     {
         path = "";
-    }
+    }*/
     
     //limpa filtros de exibição de contrato para exibir todos. mantem apenas classe como "Comissão" ou "Serviço" pois telas são separadas
+    /****************
+    Método SalvarImagemHandler()
+
+    Restaura todos os filtros para seus valores padrâo, permitindo novamente a exibição de todos os contratos do sistema
+
+    Entrada:
+    -    filterCidade: valor selecionado de filtro de cidade
+    -    filterEstado: valor selecionado de filtro de estado
+    -    filterFrequenciaUnico: valor selecionado de filtro de frequencia única
+    -    filterFrequenciaDom: valor selecionado de filtro de contratos repetidos aos domingos
+    -    filterFrequenciaSeg: valor selecionado de filtro de contratos repetidos às segundas-feiras
+    -    filterFrequenciaTer: valor selecionado de filtro de contratos repetidos às terças-feiras
+    -    filterFrequenciaQua: valor selecionado de filtro de contratos repetidos às quartas-feiras
+    -    filterFrequenciaQui: valor selecionado de filtro de contratos repetidos às quintas-feiras
+    -    filterFrequenciaSex: valor selecionado de filtro de contratos repetidos às sextas-feiras
+    -    filterFrequenciaSab: valor selecionado de filtro de contratos repetidos aos sábados
+    -    filterPrecoMax: valor selecionado de filtro de maior preço
+    -    filterPrecoMin: valor selecionado de filtro de menor preço
+    -    filterTipoBaba: valor selecionado de filtro de contratos de tipo "baba"
+    -    filterTipoObra: valor selecionado de filtro de contratos de tipo "obra"
+    -    filterTipoFaxina: valor selecionado de filtro de contratos de tipo "faxina"
+    -    filterTipoOutro: valor selecionado de filtro de contratos de tipo "outro"
+
+    Resultado: 
+    -   todos os filtros voltam aos valores default, salvo o filtro por classe de contrato, que é determinado pela tela. todos os contratos da classe atual voltam a ser exibidos
+    ****************/
     public void ClearFiltros(string filterClasseContrato)
     {
         filterCidade.value = 0;
@@ -1494,7 +2007,17 @@ public class DataBridge : MonoBehaviour
         RefreshComissionList(filterClasseContrato);
     }
 
-    //converte uma string para um float equivalente, usado nas avaliações e na comparação de preços
+    /****************
+    Função StringToFloat()
+
+    Converte a string recebida como parâmetro em valor float equivalente ao digitado
+
+    Parâmetros:
+    -   inputString: string a ser convertida
+    
+    Resultado: 
+    -   um float contendo o valor numérico representado pela string dada como parametro
+    ****************/
     private float StringToFloat(string inputString)
     {
         if(inputString.Equals(""))
@@ -1505,7 +2028,20 @@ public class DataBridge : MonoBehaviour
         return result/10;
     }
 
-    //compara preços p1 e p2, retornando 0 se iguais, 
+    /****************
+    Função ComparePrecos()
+
+    Compara dois floats, retornando um int indicativo do resultado da comparação
+
+    Parâmetros:
+    -   p1: primeiro float da comparação
+    -   p2: segundo float da comparação
+    
+    Resultado: 
+    -   se p1 é maior que p2, retorna 1
+    -   se p2 é maior que p1, retorna -1
+    -   se p1 e p2 tem o mesmo valor, retorna 0
+    ****************/
     private int ComparePrecos(float p1, float p2)
     {
         if (p1 == p2)
@@ -1519,7 +2055,18 @@ public class DataBridge : MonoBehaviour
         return -1;
     }
 
-    //verifica se preço mínimo inserido no filtro é maior que máximo ou se algum é menor que 0, tratando como erro e resetando valores
+    /****************
+    Método ValidarFiltrosPrecos()
+
+    Valida os valores inseridos como filtros de preço, evitando que o menor seja inferior a 0 ou superior ao maior e que qualquer um seja inferior a 0
+
+    Entrada:
+    -   filterPrecoMin: valor inserido como preço mínimo do filtro
+    -   filterPrecoMax: valor inserido como preço máximo do filtro
+    
+    Resultado: 
+    -   se filterPrecoMin for maior que filterPrecoMax, ou se algum dos dois for menor que 0, uma mensagem de erro é exibida
+    ****************/
     public void ValidarFiltrosPrecos()
     {
         if((filterPrecoMin.text!="" && StringToFloat(filterPrecoMin.text)<=0) || (filterPrecoMax.text != "" && StringToFloat(filterPrecoMax.text)<=0) || (filterPrecoMin.text!="" && filterPrecoMax.text!="" &&StringToFloat(filterPrecoMin.text)>StringToFloat(filterPrecoMax.text)))
@@ -1530,7 +2077,19 @@ public class DataBridge : MonoBehaviour
         }
     }
 
-    //converte caracter '.', inválido como endereço no firebase, em '"', que é válido para firebase e pode ser revertido por ser inválido em email
+    /****************
+    Função MakeTokensValid()
+
+    Alguns caracteres não são válidos para nomear endereços do banco de dados Firebase. O caractére '.' (ponto) é um deles
+    O email é a chave identificadora de um usuário, que sempre possui '.' mas por sua vez não aceita '"' (aspas duplas) como caractere
+    Esta função adapta quaisquer caracteres '.' em uma string para caracteres '"', permitindo usar e-mails como endereço firebase mas ainda converter de volta para e-mail sem ambiguidade quando necessário
+
+    Parâmetros:
+    -   inputIdString: e-mail a ser tornado válido 
+    
+    Resultado: 
+    -   uma versão modificada do e-mail é retornada, substituindo todos '.' por '"'
+    ****************/
     private string MakeTokensValid(string inputIdString)
     {
         string validTokensId = "";
@@ -1545,7 +2104,19 @@ public class DataBridge : MonoBehaviour
         return validTokensId;
     }
 
-    //retorna string "input1 input2" onde input1 é o primeiro input em ordem alfabética entre inputA e inputB, e input2 é o restante
+    /****************
+    Função SortStringsAlpha()
+
+    Concatena ambas strings dadas como parâmetro em uma única string, na qual a primeira em ordem alfabética é a primeira digitada no resultado
+
+    Parâmetros:
+    -   inputA: primeira string da concatenação
+    -   inputB: segundo string da concatenação
+    
+    Resultado: 
+    -   se inputA é a primeira em ordem alfabética ou igual a inputB, retorna inputA + " " + inputB
+    -   se inputB é a primeira em ordem alfabética, retorna inputB + " " + inputA
+    ****************/
     private string SortStringsAlpha(string inputA, string inputB)
     {
         List<string> result = new List<string> {inputA,inputB};
@@ -1553,7 +2124,20 @@ public class DataBridge : MonoBehaviour
         return result[0]+" "+result[1];
     }
 
-    //navega para janela de conversa a partir da janela de contratos
+    /****************
+    Métodos IrConversaContrato()
+
+    Executado a partir da janela de informações de um contrato
+    Registra uma visitação da janela de conversa na pilha de navegação da classe MenuController, permitindo a ela ao voltar para tela anterior posteriormente
+
+    Parâmetros:
+    -   idUsuario: identificador único do usuário destinatário
+
+    Resultado: 
+    -   visitação à tela de conversa é registrada na pilha de navegação de MenuController
+    -   atualiza lista de mensagens com o usuário destinatário
+    -   habilita listener que aguarda novas mensagens para atualizar lista de mensagens com usuário destinatário
+    ****************/
     public void IrConversaContrato(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
@@ -1567,7 +2151,18 @@ public class DataBridge : MonoBehaviour
         dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
     }
 
-    //navega para janela de perfil do usuário a partir da janela de informações do contrato
+    /****************
+    Métodos IrPerfilContrato()
+
+    Registra uma visitação da janela de perfil na pilha de navegação da classe MenuController, permitindo a ela ao voltar para tela anterior posteriormente
+
+    Parâmetros:
+    -   idUsuario: identificador único do usuário destinatário
+
+    Resultado: 
+    -   visitação à tela de perfil é registrada na pilha de navegação de MenuController
+    -   atualiza informações de perfil do usuário destinatário
+    ****************/
     public void IrPerfilContrato(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
@@ -1579,7 +2174,19 @@ public class DataBridge : MonoBehaviour
         CarregarPerfil(idUsuario);
     }
 
-    //navega para janela de conversa a partir da janela de contratos
+    /****************
+    Métodos IrMensagemList()
+
+    Registra uma visitação da janela de conversa na pilha de navegação da classe MenuController, permitindo a ela ao voltar para tela anterior posteriormente
+
+    Parâmetros:
+    -   idUsuario: identificador único do usuário destinatário
+
+    Resultado: 
+    -   visitação à tela de conversa é registrada na pilha de navegação de MenuController
+    -   atualiza lista de mensagens com o usuário destinatário
+    -   habilita listener que aguarda novas mensagens para atualizar lista de mensagens com usuário destinatário
+    ****************/
     public void IrMensagemList(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
@@ -1593,21 +2200,51 @@ public class DataBridge : MonoBehaviour
         dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
     }
 
-    //exclusão de dados
-    //exclui contrato
+    //Métodos de exclusão de dados
+    /****************
+    Métodos RemoveComission()
+
+    Exclui um contrato do banco de dados
+
+    Parâmetros:
+    -   comissionKey: identificador único do contrato a ser excluido
+
+    Resultado: 
+    -   o contrato é removido permanentemente do banco de dados
+    ****************/
     public void RemoveComission(string comissionKey)
     {
         dbRef.Child("comission/"+comissionKey).RemoveValueAsync();
     }
 
-    //exclui contato
+    /****************
+    Métodos RemoveContato()
+
+    Exclui um contato do banco de dados
+
+    Parâmetros:
+    -   contatoKey: identificador único do contato a ser excluido
+
+    Resultado: 
+    -   o contato é removido permanentemente do banco de dados
+    ****************/
     public void RemoveContato(string contatoKey)
     {
         dbRef.Child("contato/"+contatoKey).RemoveValueAsync();
         RefreshContatoList(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
     }
 
-    //deshabilita listener, parando de atualizar lista de mensagens até abrir a janela novamente
+    /****************
+    Métodos RemoveListener()
+
+    Ao sair da tela de conversa, desabilita o listener responsável por manter a conversa atualizada
+
+    Parâmetros:
+    -   idUsuario: identificador único do usuário destinatário da conversa
+
+    Resultado: 
+    -   para de atualizar a conversa até o usuário voltar à tela de conversa
+    ****************/
     public void RemoveListener(string idUsuario)
     {
         dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded -= ConversaListenHandler;
