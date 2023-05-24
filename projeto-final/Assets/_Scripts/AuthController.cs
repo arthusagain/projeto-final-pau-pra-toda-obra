@@ -20,6 +20,7 @@ public class AuthController : MonoBehaviour
     -   Retornar informações do usuário atual para as demais classes
     
     Campos:
+    -   authInstance: instancia deste singleton
     -   emailInputReg: caixa de texto onde o usuário insere o e-mail com o qual deseja se registrar
     -   passwordInputReg: caixa de texto onde o usuário insere a senha com a qual deseja se registrar
     -   emailInputLog: caixa de texto onde o usuário insere o e-mail com o qual deseja acessar o sistema
@@ -31,6 +32,7 @@ public class AuthController : MonoBehaviour
     -   errorDisplay: referência ao texto a ser editado no painel de erro
     -   message: buffer para a mensagem de erro a ser exibida
     ****************/
+    internal static AuthController authInstance;
 
     [Header("Registro")]
     [SerializeField]
@@ -43,8 +45,8 @@ public class AuthController : MonoBehaviour
     [SerializeField]
     private InputField passwordInputLog;
     [Header("Referencias de objetos")]
-    [SerializeField]
-    private GameObject globalMenu;
+    /*[SerializeField]
+    private GameObject globalMenu;*/
     [SerializeField]
     private GameObject editarPerfilMenu;
     [SerializeField]
@@ -54,6 +56,28 @@ public class AuthController : MonoBehaviour
     public GameObject errorPanel;
     public Text errorDisplay;
     string message;
+
+    /****************
+    Método MonoBehaviour.Awake()
+
+    Método herdado, executada no primeiro frame em que o objeto contendo o script atual estiver ativo, sempre antes de todas as execuções de MonoBehaviour.Start()
+    Sobrecarregada para executar as operações desejadas para o preparo inicial do objeto
+
+    Resultado: 
+    -   inicializa a instancia do singleton
+    -   evita que mais de um GameObject do Unity crie uma instancia do singleton
+    ****************/
+    void Awake() {
+        if (authInstance!= null && authInstance != this)
+        {   
+            Destroy(gameObject);
+        }
+        else
+        {
+            authInstance = this;
+        }
+        DontDestroyOnLoad(gameObject);
+    }
 
     /****************
     Método MonoBehaviour.Start()
@@ -82,7 +106,7 @@ public class AuthController : MonoBehaviour
                 if (dependencyStatus != Firebase.DependencyStatus.Available) {
                     // Caso não seja possível corrigir as falhas de dependências, uma mensagem de erro é exibida e o usuário é impedido de prosseguir
                     RaiseErrorPanel("Seu dispositivo não tem os requisitos necessários para executar este aplicativo.");
-                    UnityMainThread.wkr.AddJob(()=>{
+                    UnityMainThread.mainThreadInstance.AddJob(()=>{
                         errorPanel.GetComponent<Button>().interactable=false;
                     });
                 }
@@ -131,7 +155,7 @@ public class AuthController : MonoBehaviour
             //Caso nenhum erro ocorra, ativa telas do menu principal e desativa telas do menu de autenticação
             Firebase.Auth.FirebaseUser novoUsuario = task.Result;
 
-            UnityMainThread.wkr.AddJob(()=>{
+            UnityMainThread.mainThreadInstance.AddJob(()=>{
             authMenu.SetActive(false);
             mainMenu.SetActive(true);
             });
@@ -181,11 +205,15 @@ public class AuthController : MonoBehaviour
 
             //Caso nenhum erro ocorra, ativa telas do menu de edição de perfil e desativa telas do menu de autenticação
             Firebase.Auth.FirebaseUser novoUsuario = task.Result;
-            UnityMainThread.wkr.AddJob(()=>{
-                // Para manter a organização da funcionalidade de botão de retornar à janela anterior, os valores adequados são adicionados à suas pilhas. Este funcionamento é explicado na classe MenuController
+            UnityMainThread.mainThreadInstance.AddJob(()=>{
+            // Para manter a organização da funcionalidade de botão de retornar à janela anterior, os valores adequados são adicionados à suas pilhas. Este funcionamento é explicado na classe MenuController
+            /* implementação antiga sem singleton
             globalMenu.GetComponent<MenuController>().IrNovoTitulo("Criar meu perfil");
             globalMenu.GetComponent<MenuController>().IrNovaJanela(editarPerfilMenu);
-            globalMenu.GetComponent<MenuController>().IrNovoAux("");
+            globalMenu.GetComponent<MenuController>().IrNovoAux("");*/
+            MenuController.menuControllerInstance.IrNovoTitulo("Criar meu perfil");
+            MenuController.menuControllerInstance.IrNovaJanela(editarPerfilMenu);
+            MenuController.menuControllerInstance.IrNovoAux("");
             authMenu.SetActive(false);
             editarPerfilMenu.SetActive(true);
             });
@@ -287,7 +315,7 @@ public class AuthController : MonoBehaviour
     {
         try
         {
-            UnityMainThread.wkr.AddJob(()=>{
+            UnityMainThread.mainThreadInstance.AddJob(()=>{
                 errorPanel.SetActive(true);
                 errorDisplay.text = targetMessage;
             });

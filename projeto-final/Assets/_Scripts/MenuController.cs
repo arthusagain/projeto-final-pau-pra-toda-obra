@@ -15,6 +15,7 @@ public class MenuController : MonoBehaviour
     -   Atualizar texto do título da página
     
     Campos:
+    -   menuControllerInstance: instancia do singleton
     -   textoTituloPagina: texto para exibir no título da página
     -   tituloPagina: objeto texto na interface onde o título é exibido
     -   janela Inicio: referência ao objeto de janela de menu inicial
@@ -24,12 +25,12 @@ public class MenuController : MonoBehaviour
     -   editarPerfilMenu: referência ao painel de menu de editar perfil
     -   contratosMenu: referência ao painel de menu de contratos
     -   mensagensMenu: referência ao painel de menu de mensagens
-    ***databridgeObj: referência ao objeto contendo o singleton databridge
-    ***databridge: referência ao singleton databridge
     -   sTitulos: pilha de títulos de janelas visitadas
     -   sJanelas: pilha de referências de janelas visitadas
     -   sAux: pilha de valores auxiliares de janelas visitadas
     ****************/
+
+    internal static MenuController menuControllerInstance;
 
     string textoTituloPagina = "";
 
@@ -37,8 +38,8 @@ public class MenuController : MonoBehaviour
     private GameObject tituloPagina;
     [SerializeField]
     private GameObject janelaInicio;
-    [SerializeField]
-    private GameObject bottomMenu;
+    /*[SerializeField]
+    private GameObject bottomMenu;*/
     [SerializeField]
     private GameObject topMenu;
     [SerializeField]
@@ -49,15 +50,38 @@ public class MenuController : MonoBehaviour
     private GameObject contratosMenu;
     [SerializeField]
     private GameObject mensagensMenu;
+    /*
     [SerializeField]
     private GameObject databridgeObj;
-    private DataBridge databridge;
+    private DataBridge databridge;*/
 
     Stack<string> sTitulos = new Stack<string>();
     Stack<GameObject> sJanelas = new Stack<GameObject>();
     Stack<string> sAux = new Stack<string>();
     
     
+    /****************
+    Método MonoBehaviour.Awake()
+
+    Método herdado, executada no primeiro frame em que o objeto contendo o script atual estiver ativo, sempre antes de todas as execuções de MonoBehaviour.Start()
+    Sobrecarregada para executar as operações desejadas para o preparo inicial do objeto
+
+    Resultado: 
+    -   inicializa a instancia do singleton
+    -   evita que mais de um GameObject do Unity crie uma instancia do singleton
+    ****************/
+    void Awake() {
+        if (menuControllerInstance!= null && menuControllerInstance != this)
+        {   
+            Destroy(menuControllerInstance);
+        }
+        else
+        {
+            menuControllerInstance = this;
+        }
+        DontDestroyOnLoad(menuControllerInstance);
+    }
+
     /****************
     Método MonoBehaviour.Start()
 
@@ -69,7 +93,7 @@ public class MenuController : MonoBehaviour
     ****************/
     void Start()
     {
-        databridge = databridgeObj.GetComponent<DataBridge>();
+        //databridge = databridgeObj.GetComponent<DataBridge>();
         textoTituloPagina = "Menu Principal";
         sTitulos.Push("Menu Principal");
         sJanelas.Push(janelaInicio);
@@ -155,7 +179,8 @@ public class MenuController : MonoBehaviour
         //se está saindo da janela de troca de mensagens, para de ouvir por atualizações na lista de mensagens
         if(sJanelas.Peek()==mensagensMenu)
         {
-            databridge.RemoveListener(sAux.Peek());
+            //databridge.RemoveListener(sAux.Peek());
+            DataBridge.dataBridgeInstance.RemoveListener(sAux.Peek());
         }
 
         //desempilha as 3 pilhas de navegação, desativando tela atual e reativando a anterior
@@ -169,29 +194,36 @@ public class MenuController : MonoBehaviour
         switch(sTitulos.Peek())
         {
             case "Contratos deste usuário":
-                databridge.RefreshComissionUsuarioList();
+                //databridge.RefreshComissionUsuarioList();
+                DataBridge.dataBridgeInstance.RefreshComissionUsuarioList();
                 break;
             case "Meu Perfil":
-                databridge.CarregarPerfil(sAux.Peek());
+                //databridge.CarregarPerfil(sAux.Peek());
+                DataBridge.dataBridgeInstance.CarregarPerfil(sAux.Peek());
                 break;
             case "Avaliações":
-                databridge.RefreshAvaliacaoList();
+                //databridge.RefreshAvaliacaoList();
+                DataBridge.dataBridgeInstance.RefreshAvaliacaoList();
                 break;
             case "Serviços Disponíveis":
-                databridge.RefreshComissionList("Serviço");
+                //databridge.RefreshComissionList("Serviço");
+                DataBridge.dataBridgeInstance.RefreshComissionList("Serviço");
                 Debug.Log("Voltando para lista de serviços");
                 break;
             case "Comissões Disponíveis":
-                databridge.RefreshComissionList("Comissão");
+                //databridge.RefreshComissionList("Comissão");
+                DataBridge.dataBridgeInstance.RefreshComissionList("Comissão");
                 Debug.Log("Voltando para lista de comissões");
                 break;
             case "Minhas Conversas":
-                databridge.RefreshConversasList();
+                //databridge.RefreshConversasList();
+                DataBridge.dataBridgeInstance.RefreshConversasList();
                 break;
             default://se auxiliar começa com '-', é uma chave única de informações de contrato
                 if(sAux.Peek().Length > 0 && sAux.Peek()[0].Equals("-"))
                 {
-                    databridge.CarregaInfoContrato(sAux.Peek(), true);
+                    //databridge.CarregaInfoContrato(sAux.Peek(), true);
+                    DataBridge.dataBridgeInstance.CarregaInfoContrato(sAux.Peek(), true);
                 }
                 break;
         }
@@ -199,7 +231,7 @@ public class MenuController : MonoBehaviour
         //se voltou ao menu principal, zera a pilha
         if(string.Equals(sTitulos.Peek(),"Menu Principal"))
         {
-            UnityMainThread.wkr.AddJob(()=>{
+            UnityMainThread.mainThreadInstance.AddJob(()=>{
             topMenu.SetActive(false);
             });
             ResetNav(0);
@@ -316,4 +348,14 @@ public class MenuController : MonoBehaviour
     {
         return sAux.Peek();
     }
+
+    
+    /****************
+    Funçãoi GetTitulo()
+
+    Retorna o valor auxiliar atual para uso em outras classes
+
+    Resultado: 
+    -   retorna o valor auxiliar atual
+    ****************/
 }

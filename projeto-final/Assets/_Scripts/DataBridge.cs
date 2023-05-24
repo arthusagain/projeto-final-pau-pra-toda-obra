@@ -24,6 +24,7 @@ public class DataBridge : MonoBehaviour
     -   Adaptar entrada recebida do usuário para formato aceito pelo Firebase  
     
     Campos:
+    -   dataBridgeInstance: instancia deste singleton
     * Variáveis internas para realizar operações das funções:  
     -   path: armazena temporariamente o endereço da imagem relevante para a tela atual, seja URL da imagem sendo publicada ou caminho para a imagem armazenada no banco de dados do Firebase
     -   listenHandlerCooldown: booleano que sinaliza quando o sistema deve tentar atualizar mensagens de uma conversa, atualizado a cada alguns segundos
@@ -46,9 +47,6 @@ public class DataBridge : MonoBehaviour
     -   dbRef
     -   storage
     -   storageRef
-    *** Referencia dos demais singletons
-    -   globalMenu
-    -   authControllerObj
     * Referencias dos elementos da tela de perfil
     -   perfilPanel: a tela de exibição de perfil
     -   perfNomeUser: texto que exibe nome do usuário dono do perfil
@@ -139,6 +137,8 @@ public class DataBridge : MonoBehaviour
     -   filterPrecoMax: caixa de texto para inserir o maior preço, oferecido ou cobrado, que se aceita
     ****************/
 
+    internal static DataBridge dataBridgeInstance;
+
     string path;
     private bool listenHandlerCooldown = true;
  
@@ -162,11 +162,11 @@ public class DataBridge : MonoBehaviour
     public FirebaseStorage storage;
     public StorageReference storageRef;
 
-    [Header("Outros controladores")]
+    /*[Header("Outros controladores")]
     [SerializeField]
     private GameObject globalMenu;
     [SerializeField]
-    private GameObject authControllerObj;
+    private GameObject authControllerObj;*/
     
     [Header("Perfil")]
     [SerializeField]
@@ -344,6 +344,28 @@ public class DataBridge : MonoBehaviour
     private InputField filterPrecoMax;
 
     /****************
+    Método MonoBehaviour.Awake()
+
+    Método herdado, executada no primeiro frame em que o objeto contendo o script atual estiver ativo, sempre antes de todas as execuções de MonoBehaviour.Start()
+    Sobrecarregada para executar as operações desejadas para o preparo inicial do objeto
+
+    Resultado: 
+    -   inicializa a instancia do singleton
+    -   evita que mais de um GameObject do Unity crie uma instancia do singleton
+    ****************/
+    void Awake() {
+        if (dataBridgeInstance!= null && dataBridgeInstance != this)
+        {   
+            Destroy(DataBridge.dataBridgeInstance);
+        }
+        else
+        {
+            dataBridgeInstance = this;
+        }
+        DontDestroyOnLoad(dataBridgeInstance);
+    }
+
+    /****************
     Método MonoBehaviour.Start()
 
     Método executada no primeiro frame em que o objeto contendo o script atual estiver ativo, sempre após todas as execuções de MonoBehaviour.Awake()
@@ -416,7 +438,8 @@ public class DataBridge : MonoBehaviour
         dbRef.Child("infoUsuario").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao preparar cache de nomes de de usuarios");
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao preparar cache de nomes de de usuarios");
+                AuthController.authInstance.RaiseErrorPanel("Erro ao preparar cache de nomes de de usuarios");
             }
             else if (tarefa.IsCompleted)
             {
@@ -455,7 +478,8 @@ public class DataBridge : MonoBehaviour
     {
         if(newTitulo.text.Equals("")||newEstado.value == 0||newCidade.value == 0||newPreco.text.Equals("")||StringToFloat(newPreco.text)<=0)
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Alguns campos obrigatórios não foram preenchidos");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Alguns campos obrigatórios não foram preenchidos");
+            AuthController.authInstance.RaiseErrorPanel("Alguns campos obrigatórios não foram preenchidos");
             return;
         }
         StartCoroutine(CreateComission());
@@ -463,7 +487,7 @@ public class DataBridge : MonoBehaviour
 
     /****************
     Método SalvarAvaliacao()
-
+mainThreadInstance
     Executa corrotina para salvar avaliação no banco de dados
 
     Entrada:
@@ -474,7 +498,9 @@ public class DataBridge : MonoBehaviour
     ****************/
     public void SalvarAvaliacao()
     {
-        StartCoroutine(CreateAval(globalMenu.GetComponent<MenuController>().GetAux()));
+        //StartCoroutine(CreateAval(globalMenu.GetComponent<MenuController>().GetAux()));
+        StartCoroutine(CreateAval(MenuController.menuControllerInstance.GetAux()));
+        
     }
     
     /****************
@@ -496,7 +522,8 @@ public class DataBridge : MonoBehaviour
     {
         if(perfEditarNome.text.Equals(""))
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Nome obrigatório!");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Nome obrigatório!");
+            AuthController.authInstance.RaiseErrorPanel("Nome obrigatório!");
             return;
         }
         StartCoroutine(CreateInfoUsuario(perfEditarNome.text, perfEditarIdade.text, perfEditarGenero.text));
@@ -521,12 +548,14 @@ public class DataBridge : MonoBehaviour
     {
         if(contEditarTipo.text.Equals(""))
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Tipo de contato obrigatório!");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Tipo de contato obrigatório!");
+            AuthController.authInstance.RaiseErrorPanel("Tipo de contato obrigatório!");
             return;
         }
         if(contEditarValor.text.Equals(""))
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Informação de contato obrigatória!");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Informação de contato obrigatória!");
+            AuthController.authInstance.RaiseErrorPanel("Informação de contato obrigatória!");
             return;
         }
         StartCoroutine(CreateContato(contEditarTipo.text, contEditarValor.text));
@@ -548,10 +577,12 @@ public class DataBridge : MonoBehaviour
     {
         if (newMensagem.text.Equals(""))
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A mensagem não pode ser vazia!");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A mensagem não pode ser vazia!");
+            AuthController.authInstance.RaiseErrorPanel("A mensagem não pode ser vazia!");
             return;
         }
-        StartCoroutine(CreateMensagem(globalMenu.GetComponent<MenuController>().GetAux(), newMensagem.text));
+        //StartCoroutine(CreateMensagem(globalMenu.GetComponent<MenuController>().GetAux(), newMensagem.text));
+        StartCoroutine(CreateMensagem(MenuController.menuControllerInstance.GetAux(), newMensagem.text));
         
 
     }
@@ -579,7 +610,8 @@ public class DataBridge : MonoBehaviour
         //se idUsuário == -2, copia idUsuario utilizado para recuperar dados da tela anterior
         if(idUsuario.Equals("-2"))
         {
-            idUsuario=globalMenu.GetComponent<MenuController>().GetAux();
+            //idUsuario=globalMenu.GetComponent<MenuController>().GetAux();
+            idUsuario=MenuController.menuControllerInstance.GetAux();
         }
 
         //remove dados instanciados na ultima chamada do método
@@ -594,8 +626,10 @@ public class DataBridge : MonoBehaviour
         dbRef.Child("contato/"+MakeTokensValid(idUsuario)).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar contatos. Tente novamente mais tarde.");
-                globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar contatos. Tente novamente mais tarde.");
+                AuthController.authInstance.RaiseErrorPanel("Erro ao carregar contatos. Tente novamente mais tarde.");
+                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                MenuController.menuControllerInstance.IrJanelaAnterior();
             }
             else if (tarefa.IsCompleted){
                 //verifica se encontrou dados
@@ -620,7 +654,8 @@ public class DataBridge : MonoBehaviour
                             Destroy(contatoInstance);});
 
                         //apenas exibe botão de remover contato caso usuário esteja acessando a própria lista de contatos
-                        if(idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+                        //if(idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+                        if(idUsuario.Equals(AuthController.authInstance.GetCurrentUserId()))
                         {
                             contatoInstance.transform.Find("DeleteButton").gameObject.SetActive(true);
                         }
@@ -702,8 +737,10 @@ public class DataBridge : MonoBehaviour
         dbRef.Child("comission").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista de contratos. Tente novamente mais tarde.");
-                globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista de contratos. Tente novamente mais tarde.");
+                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                AuthController.authInstance.RaiseErrorPanel("Erro ao carregar lista de contratos. Tente novamente mais tarde.");
+                MenuController.menuControllerInstance.IrJanelaAnterior();
             }
             else if (tarefa.IsCompleted)
             {
@@ -947,7 +984,8 @@ public class DataBridge : MonoBehaviour
     {
         //atualiza dicionário de nomes caso nome de algum usuário tenha sido modificado desde o inicio da sessão
         PrepareDicNomes();
-        string idUsuario = globalMenu.GetComponent<MenuController>().GetAux();
+        //string idUsuario = globalMenu.GetComponent<MenuController>().GetAux();
+        string idUsuario = MenuController.menuControllerInstance.GetAux();
         
         //remove dados instanciados na ultima chamada do método
         for (int i = 0; i<listaComissionsUsuarioInstanciadas.Count;)
@@ -961,8 +999,10 @@ public class DataBridge : MonoBehaviour
         dbRef.Child("comission").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista de contratos deste usuário. Tente novamente mais tarde.");
-                globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista de contratos deste usuário. Tente novamente mais tarde.");
+                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                AuthController.authInstance.RaiseErrorPanel("Erro ao carregar lista de contratos deste usuário. Tente novamente mais tarde.");
+                MenuController.menuControllerInstance.IrJanelaAnterior();
             }
             else if (tarefa.IsCompleted){
                 //verifica se encontrou dados
@@ -1017,7 +1057,8 @@ public class DataBridge : MonoBehaviour
                         });
 
                         //só exibe botão de deletar contrato caso esteja olhando a própria lista de contratos
-                        if(idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+                        //if(idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+                        if(idUsuario.Equals(AuthController.authInstance.GetCurrentUserId()))
                         {
                             comissionInstance.transform.GetChild(14).gameObject.SetActive(true);
                         }
@@ -1068,8 +1109,10 @@ public class DataBridge : MonoBehaviour
         PrepareDicNomes();
 
         //se estiver olhando a própria lista de avaliações, esconde a opção de publicar sua avaliação. exibe caso contrário
-        string idUsuario = globalMenu.GetComponent<MenuController>().GetAux();
-        if (idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+        //string idUsuario = globalMenu.GetComponent<MenuController>().GetAux();
+        string idUsuario = MenuController.menuControllerInstance.GetAux();
+        //if (idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+        if (idUsuario.Equals(AuthController.authInstance.GetCurrentUserId()))
         {
             avalButton.SetActive(false);
         }
@@ -1089,8 +1132,10 @@ public class DataBridge : MonoBehaviour
         dbRef.Child("avaliacao/"+MakeTokensValid(idUsuario)).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar avaliações. Tente novamente mais tarde");
-                globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar avaliações. Tente novamente mais tarde");
+                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                AuthController.authInstance.RaiseErrorPanel("Erro ao carregar avaliações. Tente novamente mais tarde");
+                MenuController.menuControllerInstance.IrJanelaAnterior();
             }
             else if (tarefa.IsCompleted){
                 //verifica se tem dados
@@ -1135,11 +1180,16 @@ public class DataBridge : MonoBehaviour
         //se destinatárioId for -2, carrega id de último usuário acessado e empilha no MenuController os valores adequados para preparar a tela de troca de mensagem 
         if(destinatarioId.Equals("-2"))
         {
-            destinatarioId = globalMenu.GetComponent<MenuController>().GetAux();
+            //destinatarioId = globalMenu.GetComponent<MenuController>().GetAux();
+            destinatarioId = MenuController.menuControllerInstance.GetAux();
             
+            /*implementação antiga sem singleton
             globalMenu.GetComponent<MenuController>().IrNovoAux(globalMenu.GetComponent<MenuController>().GetAux());
             globalMenu.GetComponent<MenuController>().IrNovoTitulo("Conversa com "+dicNomesUsuarios[destinatarioId]);
-            globalMenu.GetComponent<MenuController>().IrNovaJanela(msgListaPanel);
+            globalMenu.GetComponent<MenuController>().IrNovaJanela(msgListaPanel);*/
+            MenuController.menuControllerInstance.IrNovoAux(MenuController.menuControllerInstance.GetAux());
+            MenuController.menuControllerInstance.IrNovoTitulo("Conversa com "+dicNomesUsuarios[destinatarioId]);
+            MenuController.menuControllerInstance.IrNovaJanela(msgListaPanel);
 
         }
 
@@ -1152,7 +1202,8 @@ public class DataBridge : MonoBehaviour
         }
 
         //carrega dados do servidor
-        dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), destinatarioId))).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
+        //dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), destinatarioId))).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
+        dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), destinatarioId))).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
                 Debug.Log("Erro ao ler lista messages");
@@ -1210,11 +1261,14 @@ public class DataBridge : MonoBehaviour
         }
 
         //recebe dados do banco
-        dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())+"/conversas").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
+        //dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())+"/conversas").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
+        dbRef.Child("infoUsuario/"+MakeTokensValid(AuthController.authInstance. GetCurrentUserId())+"/conversas").GetValueAsync().ContinueWithOnMainThread(tarefa =>{   
             if(tarefa.IsFaulted)
             {
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista conversas. Tente novamente mais tarde");
-                globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista conversas. Tente novamente mais tarde");
+                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                AuthController.authInstance.RaiseErrorPanel("Erro ao carregar lista conversas. Tente novamente mais tarde"); 
+                MenuController.menuControllerInstance.IrJanelaAnterior();
             }
             else if (tarefa.IsCompleted){
                 //verifica se há dados
@@ -1267,19 +1321,24 @@ public class DataBridge : MonoBehaviour
         //empilha valor auxiliar e objeto da tela atual. titulo é empilhado posteriormente pois é o titulo do contrato buscado
         if(!isRetorno)
         {
-            globalMenu.GetComponent<MenuController>().IrNovoAux(keyContrato);
-            globalMenu.GetComponent<MenuController>().IrNovaJanela(infoPanel);
+            //globalMenu.GetComponent<MenuController>().IrNovoAux(keyContrato);
+            //globalMenu.GetComponent<MenuController>().IrNovaJanela(infoPanel);
+            MenuController.menuControllerInstance.IrNovoAux(keyContrato);
+            MenuController.menuControllerInstance.IrNovaJanela(infoPanel);
         }
         //carrega dados do banco
         dbRef.Child("comission/"+keyContrato).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar dados do contrato. Tente novamente mais tarde");
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar dados do contrato. Tente novamente mais tarde");
+                AuthController.authInstance.RaiseErrorPanel("Erro ao carregar dados do contrato. Tente novamente mais tarde");
                 if(!isRetorno)
                 {   //empilha titulo placeholder antes de sair da tela para manter sincronia das pilha de navegação
-                    globalMenu.GetComponent<MenuController>().IrNovoTitulo("");
+                    //globalMenu.GetComponent<MenuController>().IrNovoTitulo("");
+                    MenuController.menuControllerInstance.IrNovoTitulo("");
                 }
-                globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+                MenuController.menuControllerInstance.IrJanelaAnterior();
             }
             else if (tarefa.IsCompleted)
             {
@@ -1307,7 +1366,8 @@ public class DataBridge : MonoBehaviour
                     //para poder exibir o titulo do contrato como titulo da janela, este só é empilhado após o carregamento dos dados
                     if(!isRetorno)
                     {
-                        globalMenu.GetComponent<MenuController>().IrNovoTitulo(snapshot.Child("titulo").GetValue(false).ToString());
+                        //globalMenu.GetComponent<MenuController>().IrNovoTitulo(snapshot.Child("titulo").GetValue(false).ToString());
+                        MenuController.menuControllerInstance.IrNovoTitulo(snapshot.Child("titulo").GetValue(false).ToString());
                     }
 
                     //substitui texto dos campos correspondentes pelo valor do contrato sendo acessado
@@ -1362,17 +1422,20 @@ public class DataBridge : MonoBehaviour
         //se idUsuario = -1, carrega dados do perfil do usuário atual e registra na pilha de navegação
         if (idUsuario.Equals("-1"))
         {
-            idUsuario = authControllerObj.GetComponent<AuthController>().GetCurrentUserId();
-            globalMenu.GetComponent<MenuController>().IrNovoTitulo("Meu Perfil");
-            globalMenu.GetComponent<MenuController>().IrNovoAux(idUsuario);
+            //idUsuario = authControllerObj.GetComponent<AuthController>().GetCurrentUserId();
+            //globalMenu.GetComponent<MenuController>().IrNovoTitulo("Meu Perfil");
+            //globalMenu.GetComponent<MenuController>().IrNovoAux(idUsuario);
+            idUsuario = AuthController.authInstance.GetCurrentUserId();
+            MenuController.menuControllerInstance.IrNovoTitulo("Meu Perfil");
+            MenuController.menuControllerInstance.IrNovoAux(idUsuario);
         }
 
         //busca perfil do usuario no sistema
         dbRef.Child("infoUsuario").Child(MakeTokensValid(idUsuario)).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar o perfil deste usuário. Tente novamente mais tarde");
-
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar o perfil deste usuário. Tente novamente mais tarde");
+                AuthController.authInstance.RaiseErrorPanel("Erro ao carregar o perfil deste usuário. Tente novamente mais tarde");
             }
             else if (tarefa.IsCompleted)
             {
@@ -1406,7 +1469,8 @@ public class DataBridge : MonoBehaviour
                     perfEditarIdade.text = snapshot.Child("idadeUsuario").GetValue(false).ToString();
                     perfEditarGenero.text = snapshot.Child("generoUsuario").GetValue(false).ToString();
 
-                    if(globalMenu.GetComponent<MenuController>().GetTitulo().Equals("Meu Perfil"))
+                    //if(globalMenu.GetComponent<MenuController>().GetTitulo().Equals("Meu Perfil"))
+                    if(MenuController.menuControllerInstance.GetTitulo().Equals("MeuPerfil"))
                     {
                         //perfil deste usuario. habilita botao para editar
                         butPerfEditar.SetActive(true);
@@ -1441,7 +1505,8 @@ public class DataBridge : MonoBehaviour
 
         //atualiza lista de mensagens após o atraso
         listenHandlerCooldown = true;
-        RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
+        //RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
+        RefreshMensagemList(MenuController.menuControllerInstance.GetAux());
     }
 
     //abre caixa de dialogo para navegar nos arquivos do dispositivo e escolher imagem. carrega imagem escolhida como textura de targetRawImage
@@ -1485,7 +1550,8 @@ public class DataBridge : MonoBehaviour
         yield return request.SendWebRequest();
         if(request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar imagem: "+request.error);
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar imagem: "+request.error);
+            AuthController.authInstance.RaiseErrorPanel("Erro ao carregar imagem: "+request.error);
         }
         else
         {
@@ -1534,7 +1600,8 @@ public class DataBridge : MonoBehaviour
             storageRef.Child(newImagePath).PutBytesAsync(((Texture2D)newImagem.texture).EncodeToPNG()).ContinueWithOnMainThread(tarefa => {
                 if(tarefa.IsFaulted || tarefa.IsCanceled){
                     //se falhar a publicar a imagem, salva contrato sem imagem
-                    authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Contrato será registrado sem imagem.");
+                    //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Contrato será registrado sem imagem.");
+                    AuthController.authInstance.RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Contrato será registrado sem imagem.");
                     newImagePath = "";
                 }
             });
@@ -1600,7 +1667,8 @@ public class DataBridge : MonoBehaviour
         }
 
         //cria objeto Comission com dados definidos na tela, transforma em dicionário e publica para caminho adequado no servidor firebase
-        dataComission = new Comission(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), newTitulo.text, newDescricao.text, newImagePath, newEstado.captionText.text, newCidade.captionText.text, thisFrequencia, thisTipo, newPreco.text, thisClasse);
+        //dataComission = new Comission(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), newTitulo.text, newDescricao.text, newImagePath, newEstado.captionText.text, newCidade.captionText.text, thisFrequencia, thisTipo, newPreco.text, thisClasse);
+        dataComission = new Comission(AuthController.authInstance.GetCurrentUserId(), newTitulo.text, newDescricao.text, newImagePath, newEstado.captionText.text, newCidade.captionText.text, thisFrequencia, thisTipo, newPreco.text, thisClasse);
         Dictionary<string,System.Object> dicComissao = dataComission.ToDictionary();
         var TarefaDB = dbRef.Child("comission").Push().SetValueAsync(dicComissao);
 
@@ -1608,7 +1676,8 @@ public class DataBridge : MonoBehaviour
 
         if (TarefaDB.Exception != null)
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar novo contrato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar novo contrato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
+            AuthController.authInstance.RaiseErrorPanel("Falha ao registrar novo contrato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
         }
         else{
             //contrato publicado com sucesso. volta a lista de contratos anterior
@@ -1636,31 +1705,36 @@ public class DataBridge : MonoBehaviour
     IEnumerator CreateMensagem(string destino, string conteudo)
     {
         //cria objeto Message com valores inseridos e converte para dicionário
-        dataMessage = new Message(dicNomesUsuarios[authControllerObj.GetComponent<AuthController>().GetCurrentUserId()],dicNomesUsuarios[destino],conteudo);
+        //dataMessage = new Message(dicNomesUsuarios[authControllerObj.GetComponent<AuthController>().GetCurrentUserId()],dicNomesUsuarios[destino],conteudo);
+        dataMessage = new Message(dicNomesUsuarios[AuthController.authInstance.GetCurrentUserId()],dicNomesUsuarios[destino],conteudo);
         Dictionary<string,System.Object> dicMessage = dataMessage.ToDictionary();
 
         //registra inicio de conversa para usuário atual
-        var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())+"/conversas/"+MakeTokensValid(destino)).SetValueAsync(destino);
-
+        //var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())+"/conversas/"+MakeTokensValid(destino)).SetValueAsync(destino);
+        var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())+"/conversas/"+MakeTokensValid(destino)).SetValueAsync(destino);
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         //registra inicio de conversa para usuário recebendo a mensagem
-        TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(destino)+"/conversas/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
+        //TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(destino)+"/conversas/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
+        TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(destino)+"/conversas/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())).SetValueAsync(AuthController.authInstance.GetCurrentUserId());
 
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         //registra mensagem no servidor firebase na lista de mensagens trocadas na conversa destes dois usuários
-        TarefaDB = dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), destino))).Push().SetValueAsync(dicMessage);
+        //TarefaDB = dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), destino))).Push().SetValueAsync(dicMessage);
+        TarefaDB = dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), destino))).Push().SetValueAsync(dicMessage);
 
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         if (TarefaDB.Exception != null)
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar nova mensagem: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar nova mensagem: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");]
+            AuthController.authInstance.RaiseErrorPanel("Falha ao registrar nova mensagem: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
         }
         else{
             //sucesso publicando nova mensagem. atualiza lista de exibição
-            RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
+            //RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
+            RefreshMensagemList(MenuController.menuControllerInstance.GetAux());
         }
 
         //limpa caixa de texto de mensagem
@@ -1695,7 +1769,8 @@ public class DataBridge : MonoBehaviour
             storageRef.Child(newImagePath).PutBytesAsync(((Texture2D)perfEditarImagem.texture).EncodeToPNG()).ContinueWithOnMainThread(tarefa => {
                 if(tarefa.IsFaulted || tarefa.IsCanceled){
                     //se falhar a publicar a imagem, salva perfil sem imagem
-                    authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Perfil será registrado sem imagem.");
+                    //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Perfil será registrado sem imagem.");
+                    AuthController.authInstance.RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Perfil será registrado sem imagem.");
                     newImagePath = "";
                 }
             });
@@ -1705,21 +1780,28 @@ public class DataBridge : MonoBehaviour
             newImagePath = "";
         }
         //cria novo objeto InfoUsuario, converte para dicionário e publica no caminho adequado no servidor firebase
-        dataPerfil = new InfoUsuario(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),newPerfNome,newPerfGenero,newPerfIdade,newImagePath);
+        //dataPerfil = new InfoUsuario(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),newPerfNome,newPerfGenero,newPerfIdade,newImagePath);
+        dataPerfil = new InfoUsuario(AuthController.authInstance.GetCurrentUserId(),newPerfNome,newPerfGenero,newPerfIdade,newImagePath);
+                    
         Dictionary<string,System.Object> dicPerfil = dataPerfil.ToDictionary();
-        var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(dicPerfil);
+        //var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(dicPerfil);
+        var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())).SetValueAsync(dicPerfil);
 
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         if (TarefaDB.Exception != null)
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar perfil: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar perfil: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
+            AuthController.authInstance.RaiseErrorPanel("Falha ao registrar perfil: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
         }
         else{
             //perfil salvo com sucesso. atualiza tela de perfil e dicionário de nomes, e limpando path da image para uploads futuros
-            CarregarPerfil(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
+            //CarregarPerfil(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
+            CarregarPerfil(AuthController.authInstance.GetCurrentUserId());
+
             path = "";
-            globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+            //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
+            MenuController.menuControllerInstance.IrJanelaAnterior();
             PrepareDicNomes();
         }
     }
@@ -1740,19 +1822,22 @@ public class DataBridge : MonoBehaviour
     IEnumerator CreateContato(string newContatoTipo, string newContatoValor)
     {
         //cria objeto Contato com valores inseridos, converte em dicionário e publica no caminho adequado no servidor firebase
-        dataContato = new Contato(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),newContatoTipo,newContatoValor);
+        //dataContato = new Contato(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),newContatoTipo,newContatoValor);
+        dataContato = new Contato(AuthController.authInstance.GetCurrentUserId(),newContatoTipo,newContatoValor);
         Dictionary<string,System.Object> dicContato = dataContato.ToDictionary();
-        var TarefaDB = dbRef.Child("contato/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).Push().SetValueAsync(dicContato);
-
+        //var TarefaDB = dbRef.Child("contato/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).Push().SetValueAsync(dicContato);
+        var TarefaDB = dbRef.Child("contato/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())).Push().SetValueAsync(dicContato);
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         if (TarefaDB.Exception != null)
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar novo contato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar novo contato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
+            AuthController.authInstance.RaiseErrorPanel("Falha ao registrar novo contato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
         }
         else{
             //contato salvo com suceso. atualiza lista sendo exibida
-            RefreshContatoList(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
+            //RefreshContatoList(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
+            RefreshContatoList(AuthController.authInstance.GetCurrentUserId());
         }
     }
 
@@ -1771,14 +1856,18 @@ public class DataBridge : MonoBehaviour
     IEnumerator CreateAval(string avaliadoId)
     {
         //cria objeto Avaliacao com valor inserido e usuários associados, converte para dicionário e salva no local adequado no servidor 
-        dataAval = new Avaliacao(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),avalSlider.value.ToString("F1"));
+        //dataAval = new Avaliacao(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),avalSlider.value.ToString("F1"));
+        dataAval = new Avaliacao(AuthController.authInstance.GetCurrentUserId(),avalSlider.value.ToString("F1"));
         Dictionary<string,System.Object> dicAvaliacao = dataAval.ToDictionary();
-        var TarefaDB = dbRef.Child("avaliacao/"+MakeTokensValid(avaliadoId)+"/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(dicAvaliacao);
+        //var TarefaDB = dbRef.Child("avaliacao/"+MakeTokensValid(avaliadoId)+"/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(dicAvaliacao);
+        var TarefaDB = dbRef.Child("avaliacao/"+MakeTokensValid(avaliadoId)+"/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())).SetValueAsync(dicAvaliacao);
+        
 
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
         if (TarefaDB.Exception != null) 
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar nova avaliação: "+(TarefaDB.Exception)+" Tente novamente mais tarde");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar nova avaliação: "+(TarefaDB.Exception)+" Tente novamente mais tarde");
+            AuthController.authInstance.RaiseErrorPanel("Falha ao registrar nova avaliação: "+(TarefaDB.Exception)+" Tente novamente mais tarde");
         }
         else{
             //avaliação registrada com sucesso. atualiza lista de exibição
@@ -1798,7 +1887,8 @@ public class DataBridge : MonoBehaviour
     ****************/
     public void SetContatoButton()
     {
-        if(globalMenu.GetComponent<MenuController>().GetAux().Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+        //if(globalMenu.GetComponent<MenuController>().GetAux().Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+        if(MenuController.menuControllerInstance.GetAux().Equals(AuthController.authInstance.GetCurrentUserId()))
         {
             contButtonText.text = "Adicionar forma de contato";
         }
@@ -1818,16 +1908,22 @@ public class DataBridge : MonoBehaviour
     ****************/
     public void ContatoButtonHandler()
     {
-        if(globalMenu.GetComponent<MenuController>().GetAux().Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+        //if(globalMenu.GetComponent<MenuController>().GetAux().Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
+        if(MenuController.menuControllerInstance.GetAux().Equals(AuthController.authInstance.GetCurrentUserId()))
         {
             //abrir painel de criar contato
             contNovoPainel.SetActive(true);
         }
         else{
             //registra navegação na pila
+            /*implementação antiga sem singleton
             globalMenu.GetComponent<MenuController>().IrNovoAux(globalMenu.GetComponent<MenuController>().GetAux());
             globalMenu.GetComponent<MenuController>().IrNovoTitulo("Conversa com "+dicNomesUsuarios[globalMenu.GetComponent<MenuController>().GetAux()]);
-            globalMenu.GetComponent<MenuController>().IrNovaJanela(msgListaPanel);
+            globalMenu.GetComponent<MenuController>().IrNovaJanela(msgListaPanel);*/
+            MenuController.menuControllerInstance.IrNovoAux(MenuController.menuControllerInstance.GetAux());
+            MenuController.menuControllerInstance.IrNovoTitulo("Conversa com "+dicNomesUsuarios[MenuController.menuControllerInstance.GetAux()]);
+            MenuController.menuControllerInstance.IrNovaJanela(msgListaPanel);
+
             //sai da janela de contatos janela contatos
             contListaPanel.SetActive(false);
             //vai para janela de conversa
@@ -1893,7 +1989,7 @@ public class DataBridge : MonoBehaviour
         if (listenHandlerCooldown)
         {
             //RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
-            Debug.Log("Nova mensagem. Refresh conversa com "+globalMenu.GetComponent<MenuController>().GetAux());
+            Debug.Log("Nova mensagem. Refresh conversa com "+MenuController.menuControllerInstance.GetAux());
             listenHandlerCooldown = false;
             StartCoroutine(CooldownHandler());
         }
@@ -1932,7 +2028,8 @@ public class DataBridge : MonoBehaviour
                     StartCoroutine(LoadImagemUrl(perfURLImagem.text,perfEditarImagem));
                 }
                 else{
-                    authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A imagem deve ser um arquivo .png");
+                    //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A imagem deve ser um arquivo .png");
+                    AuthController.authInstance.RaiseErrorPanel("A imagem deve ser um arquivo .png");
                 }
                 break;
             case 2:
@@ -1942,11 +2039,13 @@ public class DataBridge : MonoBehaviour
                     StartCoroutine(LoadImagemUrl(newURLImagem.text,newImagem));
                 }
                 else{
-                    authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A imagem deve ser um arquivo .png");
+                    //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A imagem deve ser um arquivo .png");AuthController.authInstance.
+                    AuthController.authInstance.RaiseErrorPanel("A imagem deve ser um arquivo .png");
                 }
                 break;
             default:
-                authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Opa, você não devia ter acesso ao upload de imagem nessa página.");
+                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Opa, você não devia ter acesso ao upload de imagem nessa página.");
+                AuthController.authInstance.RaiseErrorPanel("Opa, você não devia ter acesso ao upload de imagem nessa página.");
             break;
         }
     }
@@ -2071,7 +2170,8 @@ public class DataBridge : MonoBehaviour
     {
         if((filterPrecoMin.text!="" && StringToFloat(filterPrecoMin.text)<=0) || (filterPrecoMax.text != "" && StringToFloat(filterPrecoMax.text)<=0) || (filterPrecoMin.text!="" && filterPrecoMax.text!="" &&StringToFloat(filterPrecoMin.text)>StringToFloat(filterPrecoMax.text)))
         {
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("O preço mínimo deve ser menor que o máximo, e ambos devem ser maiores que 0");
+            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("O preço mínimo deve ser menor que o máximo, e ambos devem ser maiores que 0");
+            AuthController.authInstance.RaiseErrorPanel("O preço mínimo deve ser menor que o máximo, e ambos devem ser maiores que 0");
             filterPrecoMin.text = "";
             filterPrecoMax.text = "";
         }
@@ -2141,14 +2241,16 @@ public class DataBridge : MonoBehaviour
     public void IrConversaContrato(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
-        MenuController menu = globalMenu.GetComponent<MenuController>();
-        menu.IrNovaJanela(msgListaPanel);
-        menu.IrNovoAux(idUsuario);
-        menu.IrNovoTitulo("Conversa com "+dicNomesUsuarios[idUsuario]);
+        //MenuController menu = globalMenu.GetComponent<MenuController>();
+
+        MenuController.menuControllerInstance.IrNovaJanela(msgListaPanel);
+        MenuController.menuControllerInstance.IrNovoAux(idUsuario);
+        MenuController.menuControllerInstance.IrNovoTitulo("Conversa com "+dicNomesUsuarios[idUsuario]);
         //carrega mensagens trocadas entre este usuário e o outro
         RefreshMensagemList(idUsuario);
         //habilita listener para atualizar lista ao receber nova mensagem
-        dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
+        //dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
+        dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
     }
 
     /****************
@@ -2166,10 +2268,11 @@ public class DataBridge : MonoBehaviour
     public void IrPerfilContrato(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
-        MenuController menu = globalMenu.GetComponent<MenuController>();
-        menu.IrNovaJanela(perfilPanel);
-        menu.IrNovoAux(idUsuario);
-        menu.IrNovoTitulo("Perfil de "+dicNomesUsuarios[idUsuario]);
+        //MenuController menu = globalMenu.GetComponent<MenuController>();
+
+        MenuController.menuControllerInstance.IrNovaJanela(perfilPanel);
+        MenuController.menuControllerInstance.IrNovoAux(idUsuario);
+        MenuController.menuControllerInstance.IrNovoTitulo("Perfil de "+dicNomesUsuarios[idUsuario]);
         //carrega informações do perfil
         CarregarPerfil(idUsuario);
     }
@@ -2190,14 +2293,15 @@ public class DataBridge : MonoBehaviour
     public void IrMensagemList(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
-        MenuController menu = globalMenu.GetComponent<MenuController>();
-        menu.IrNovaJanela(msgListaPanel);
-        menu.IrNovoAux(idUsuario);
-        menu.IrNovoTitulo("Conversa com "+dicNomesUsuarios[idUsuario]);
+        //MenuController menu = globalMenu.GetComponent<MenuController>();
+        MenuController.menuControllerInstance.IrNovaJanela(msgListaPanel);
+        MenuController.menuControllerInstance.IrNovoAux(idUsuario);
+        MenuController.menuControllerInstance.IrNovoTitulo("Conversa com "+dicNomesUsuarios[idUsuario]);
         //carrega lista de mensagens trocadas entre usuários
         RefreshMensagemList(idUsuario);
         //habilita listener para atualizar lista ao receber nova mensagem
-        dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
+        //dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
+        dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
     }
 
     //Métodos de exclusão de dados
@@ -2231,7 +2335,8 @@ public class DataBridge : MonoBehaviour
     public void RemoveContato(string contatoKey)
     {
         dbRef.Child("contato/"+contatoKey).RemoveValueAsync();
-        RefreshContatoList(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
+        //RefreshContatoList(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
+        RefreshContatoList(AuthController.authInstance.GetCurrentUserId());
     }
 
     /****************
@@ -2247,7 +2352,7 @@ public class DataBridge : MonoBehaviour
     ****************/
     public void RemoveListener(string idUsuario)
     {
-        dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded -= ConversaListenHandler;
-        
+        //dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded -= ConversaListenHandler;
+        dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), idUsuario))).ChildAdded -= ConversaListenHandler;
     }
 }

@@ -10,11 +10,11 @@ internal class UnityMainThread : MonoBehaviour
     Singleton responsável por garantir a execução de métodos e funções na thread principal
 
     Campos:
-    -   wkr: instancia do singleton
+    -   mainThreadInstance: instancia do singleton
     -   jobs: fila de tarefas a serem executadas na thread principal
     ****************/
 
-    internal static UnityMainThread wkr;
+    internal static UnityMainThread mainThreadInstance;
     Queue<Action> jobs = new Queue<Action>();
 
     /****************
@@ -25,9 +25,18 @@ internal class UnityMainThread : MonoBehaviour
 
     Resultado: 
     -   inicializa a instancia do singleton
+    -   evita que mais de um GameObject do Unity crie uma instancia do singleton
     ****************/
     void Awake() {
-        wkr = this;
+        if (mainThreadInstance!= null && mainThreadInstance != this)
+        {   
+            Destroy(mainThreadInstance);
+        }
+        else
+        {
+            mainThreadInstance = this;
+        }
+        DontDestroyOnLoad(mainThreadInstance);
     }
 
     /****************
