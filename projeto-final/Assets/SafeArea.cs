@@ -54,21 +54,25 @@ public class SafeArea : MonoBehaviour
     ****************/
     void ApplySafeArea()
     {
+        //cancela operação se referência não estiver propriamente inicializada 
         if (transformSafeArea == null)
         {
             return;
         }
 
+        //recebe dimensões iniciais da área segura
         Rect safeAreaRect = Screen.safeArea;
         Vector2 anchorMin = safeAreaRect.position;
         Vector2 anchorMax = safeAreaRect.position - safeAreaRect.size;
 
+        //ajusta dimensões de acordo com dimensões da tela a ser adaptada
         anchorMin.x /= targetCanvas.pixelRect.width;
         anchorMin.y /= targetCanvas.pixelRect.height;
 
         anchorMax.x /= targetCanvas.pixelRect.width;
         anchorMax.y /= targetCanvas.pixelRect.height;
 
+        //aplica alterações à área segura
         transformSafeArea.anchorMin = anchorMin;
         transformSafeArea.anchorMax = anchorMax;
 
