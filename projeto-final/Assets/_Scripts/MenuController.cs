@@ -113,6 +113,12 @@ public class MenuController : MonoBehaviour
     {
         //manter título atualizado
         tituloPagina.GetComponent<Text>().text = textoTituloPagina;
+
+        //ativar retorno caso botão nativo do celular seja precionado
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            IrJanelaAnterior();
+        }
     }
     
     /****************

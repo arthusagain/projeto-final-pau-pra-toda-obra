@@ -964,7 +964,7 @@ mainThreadInstance
     }
 
     /****************
-    Método RefreshComissionList()
+    Método RefreshComissionUsuarioList()
 
     Executado na tela de lista de contratos publicadas por um usuário especifico, em seu perfil
     Lê, no banco de dados, as informações de de contratos publicadas no sistema pelo usuário dono do perfil sendo acessado, e instancia cada elemento na interface como um cartão em uma lista
@@ -1531,8 +1531,13 @@ mainThreadInstance
         else
         {
             //passa imagem carregada como textura para imagem alvo
-            Texture myTexture =((DownloadHandlerTexture)request.downloadHandler).texture;
-            targetImage.texture = myTexture;
+            Texture newTexture =((DownloadHandlerTexture)request.downloadHandler).texture;
+            targetImage.texture = newTexture;
+            
+            //ajusta tamanho para manter proporção
+            targetImage.rectTransform.sizeDelta= new Vector2(
+                targetImage.texture.width * 200 / Mathf.Max(targetImage.texture.width,targetImage.texture.height),
+                targetImage.texture.height * 200 / Math.Max(targetImage.texture.width,targetImage.texture.height));
         }
     }
 
@@ -1867,21 +1872,25 @@ mainThreadInstance
     ****************/
     public void AttemptReadFile()
     {
+        //se não permitiu acesso ainda, requisita
         if(NativeFilePicker.CheckPermission()!=NativeFilePicker.Permission.Granted)
         {
             PermissionPanel.SetActive(true);
             return;
         }
+        //se já está selecionando o arquivo, cancela chamada duplicada do método
         if( NativeFilePicker.IsFilePickerBusy() )
 			return;
         NativeFilePicker.PickFile( (filePath)=>
         {
+            //se path vazio, nenhum arquivo foi selecionado, logo cancela
             if(filePath == "")
             {
                 Debug.Log("Seleção de imagem cancelada");
                 return;
             }
 
+            //obtem imagem a partir do caminho do arquivo
             RawImage targetRawImage;
             if(MenuController.menuControllerInstance.GetTitulo() == "Editar Meu Perfil")
             {
@@ -1900,7 +1909,7 @@ mainThreadInstance
             //redimensiona nova imagem para manter proporção da original
             targetRawImage.rectTransform.sizeDelta= new Vector2(
                 targetRawImage.texture.width * 200 / Mathf.Max(targetRawImage.texture.width,targetRawImage.texture.height),
-                targetRawImage.texture.height * 200 / Mathf.Max(targetRawImage.texture.width,targetRawImage.texture.height));
+                targetRawImage.texture.height * 200 / Math.Max(targetRawImage.texture.width,targetRawImage.texture.height));
             path = filePath;
         }
         ,"image/png");
