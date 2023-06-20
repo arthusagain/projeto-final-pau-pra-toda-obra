@@ -1536,8 +1536,8 @@ mainThreadInstance
             
             //ajusta tamanho para manter proporção
             targetImage.rectTransform.sizeDelta= new Vector2(
-                targetImage.texture.width * 200 / Mathf.Max(targetImage.texture.width,targetImage.texture.height),
-                targetImage.texture.height * 200 / Math.Max(targetImage.texture.width,targetImage.texture.height));
+                targetImage.texture.width * 600 / Mathf.Max(targetImage.texture.width,targetImage.texture.height),
+                targetImage.texture.height * 600 / Math.Max(targetImage.texture.width,targetImage.texture.height));
         }
     }
 
@@ -1575,7 +1575,7 @@ mainThreadInstance
         if (path != "" && path != null && path.Substring(path.Length-4).Equals(".png"))
         {
             //usa horário atual com 4 casas decimais de precisão como nome efetivamente único para o arquivo da imagem, e tenta enviar para o servidor
-            newImagePath = DateTime.Now.ToString("yyyyMMddHHmmssffff")+".png";
+            newImagePath = DateTime.Now.ToString("yyyyMMddHHmmssffff-"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId()))+".png";
             storageRef.Child(newImagePath).PutBytesAsync(((Texture2D)newImagem.texture).EncodeToPNG()).ContinueWithOnMainThread(tarefa => {
                 if(tarefa.IsFaulted || tarefa.IsCanceled){
                     //se falhar a publicar a imagem, salva contrato sem imagem
@@ -1908,8 +1908,8 @@ mainThreadInstance
 
             //redimensiona nova imagem para manter proporção da original
             targetRawImage.rectTransform.sizeDelta= new Vector2(
-                targetRawImage.texture.width * 200 / Mathf.Max(targetRawImage.texture.width,targetRawImage.texture.height),
-                targetRawImage.texture.height * 200 / Math.Max(targetRawImage.texture.width,targetRawImage.texture.height));
+                targetRawImage.texture.width * 600 / Mathf.Max(targetRawImage.texture.width,targetRawImage.texture.height),
+                targetRawImage.texture.height * 600 / Math.Max(targetRawImage.texture.width,targetRawImage.texture.height));
             path = filePath;
         }
         ,"image/png");
@@ -2100,8 +2100,8 @@ mainThreadInstance
     public void ClearImageField()
     {
         path = "";
-        perfEditarImagem.texture = new Texture2D(200,200) as Texture;
-        newImagem.texture = new Texture2D(200,200) as Texture;
+        perfEditarImagem.texture = new Texture2D(600,600) as Texture;
+        newImagem.texture = new Texture2D(600,600) as Texture;
     }
     
     //limpa filtros de exibição de contrato para exibir todos. mantem apenas classe como "Comissão" ou "Serviço" pois telas são separadas
