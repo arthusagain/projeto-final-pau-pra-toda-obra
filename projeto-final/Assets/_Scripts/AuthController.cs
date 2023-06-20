@@ -39,14 +39,14 @@ public class AuthController : MonoBehaviour
     private InputField emailInputReg;
     [SerializeField]
     private InputField passwordInputReg;
+    [SerializeField]
+    private InputField confirmPasswordInputReg;
     [Header("Login")]
     [SerializeField]
     private InputField emailInputLog;
     [SerializeField]
     private InputField passwordInputLog;
     [Header("Referencias de objetos")]
-    /*[SerializeField]
-    private GameObject globalMenu;*/
     [SerializeField]
     private GameObject editarPerfilMenu;
     [SerializeField]
@@ -307,9 +307,10 @@ public class AuthController : MonoBehaviour
     Habilita painel AuthController.errorPanel para aparecer na frente das demais telas do aplicativo, exibindo a mensagem de erro desejada
 
     Parâmetros:
-    - targetMessage contem a mensagem a ser exibida
+    - targetMessage: contem a mensagem a ser exibida
 
-    Resultado: o painel AuthController.errorPanel cobre a tela e exibe o valor targetMessage como texto
+    Resultado: 
+    -   o painel AuthController.errorPanel cobre a tela e exibe o valor targetMessage como texto
     ****************/
     public void RaiseErrorPanel(string targetMessage)
     {
@@ -325,5 +326,47 @@ public class AuthController : MonoBehaviour
             Debug.LogException(e);
         }
     }
+
+    /****************
+    Método AuthController.ToggleShowPassword()
+
+    Habilita ou desabilita a exibição dos caracteres digitados da senha
+
+    Entrada:
+    - targetMessage contem a mensagem a ser exibida
+
+    Resultado:
+    - se a senha estava escondida, é exibida
+    - se a senha estava sendo exibida, é escondida
+    ****************/
+    public void ToggleShowPassword()
+    {
+        //se é senha, exibe como texto planio
+        if(passwordInputLog.contentType == InputField.ContentType.Password)
+        {
+            passwordInputLog.contentType = InputField.ContentType.Standard;
+            passwordInputReg.contentType = InputField.ContentType.Standard;
+            confirmPasswordInputReg.contentType = InputField.ContentType.Standard;
+
+            
+            passwordInputLog.ForceLabelUpdate();
+            passwordInputReg.ForceLabelUpdate();
+            confirmPasswordInputReg.ForceLabelUpdate();
+        }
+        //se é texto plano, exibe como senha
+        else{
+            passwordInputLog.contentType = InputField.ContentType.Password;
+            passwordInputReg.contentType = InputField.ContentType.Password;
+            confirmPasswordInputReg.contentType = InputField.ContentType.Password;
+
+            
+            passwordInputLog.ForceLabelUpdate();
+            passwordInputReg.ForceLabelUpdate();
+            confirmPasswordInputReg.ForceLabelUpdate();
+
+        }
+
+    }
+
 
 }

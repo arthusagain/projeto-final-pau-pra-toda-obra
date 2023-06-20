@@ -454,7 +454,7 @@ public class DataBridge : MonoBehaviour
 
     //Métodos para salvar dados
     /****************
-    Método SalvarComissao()
+    Método DataBridge.SalvarComissao()
 
     Verifica se os valores inseridos são válidos. Se sim, salva dados no banco como novo contrato
 
@@ -480,7 +480,7 @@ public class DataBridge : MonoBehaviour
     }
 
     /****************
-    Método SalvarAvaliacao()
+    Método DataBridge.SalvarAvaliacao()
 mainThreadInstance
     Executa corrotina para salvar avaliação no banco de dados
 
@@ -498,7 +498,7 @@ mainThreadInstance
     }
     
     /****************
-    Método SalvarPerfil()
+    Método DataBridge.SalvarPerfil()
 
     Verifica se um nome foi inserido na edição de perfil. Se sim, cria e salva seu perfil no sistema, caso seja um novo usuário, ou apenas atualiza seus dados caso já tenha perfil
 
@@ -524,7 +524,7 @@ mainThreadInstance
     }
 
     /****************
-    Método SalvarContato()
+    Método DataBridge.SalvarContato()
 
     Verifica se tipo e informações de contato fram inseridos. Se sim, salva objeto contato no banco de dados. Senão, exibe erro adequado
 
@@ -556,7 +556,7 @@ mainThreadInstance
     }
 
     /****************
-    Método EnviarMensagem()
+    Método DataBridge.EnviarMensagem()
 
     Verifica se a caixa de nova mensagem foi preenchida. Se sim, cria nova mensagem na conversa entre usuário atual e seu destinatário
 
@@ -583,7 +583,7 @@ mainThreadInstance
 
     //Métodos de atualzação de dados exibidos
     /****************
-    Método RefreshContatoList()
+    Método DataBridge.RefreshContatoList()
 
     Executado na tela de lista de formas de contato de um usuário
     Lê, no banco de dados, as informações de contato que o usuário publicou no sistema, e instancia cada elemento na interface como um cartão em uma lista
@@ -666,7 +666,7 @@ mainThreadInstance
     }
 
     /****************
-    Método RefreshComissionList()
+    Método DataBridge.RefreshComissionList()
 
     Executado na tela de lista de contratos
     Lê, no banco de dados, as informações de contratos publicados no sistema, e instancia cada elemento na interface como um cartão em uma lista
@@ -953,7 +953,7 @@ mainThreadInstance
                                 }
                                 else{
                                     RawImage comissionImagem = comissionInstance.transform.Find("RawImage").GetComponent<RawImage>();
-                                    StartCoroutine(LoadImagemUrl(subtarefa.Result.ToString(),comissionInstance.transform.Find("RawImage").GetComponent<RawImage>()));
+                                    StartCoroutine(LoadImagemUrl(subtarefa.Result.ToString(),comissionInstance.transform.Find("RawImage").GetComponent<RawImage>(),200));
                                 }
                             });
                         }
@@ -964,7 +964,7 @@ mainThreadInstance
     }
 
     /****************
-    Método RefreshComissionUsuarioList()
+    Método DataBridge.RefreshComissionUsuarioList()
 
     Executado na tela de lista de contratos publicadas por um usuário especifico, em seu perfil
     Lê, no banco de dados, as informações de de contratos publicadas no sistema pelo usuário dono do perfil sendo acessado, e instancia cada elemento na interface como um cartão em uma lista
@@ -1076,7 +1076,7 @@ mainThreadInstance
                                 }
                                 else{
                                     RawImage comissionImagem = comissionInstance.transform.Find("RawImage").GetComponent<RawImage>();
-                                    StartCoroutine(LoadImagemUrl(subtarefa.Result.ToString(),comissionInstance.transform.Find("RawImage").GetComponent<RawImage>()));
+                                    StartCoroutine(LoadImagemUrl(subtarefa.Result.ToString(),comissionInstance.transform.Find("RawImage").GetComponent<RawImage>(),200));
                                 }
                             });
                         }
@@ -1087,7 +1087,7 @@ mainThreadInstance
     }
 
     /****************
-    Método RefreshAvaliacaoList()
+    Método DataBridge.RefreshAvaliacaoList()
 
     Executado na tela de lista de avaliações publicadas sobre um usuário especifico, em seu perfil
     Lê, no banco de dados, as informações de avaliações direcionadas ao usuário dono do perfil sendo acessado, e instancia cada elemento na interface como um cartão em uma lista
@@ -1155,7 +1155,7 @@ mainThreadInstance
     }
 
     /****************
-    Método RefreshMensagemList()
+    Método DataBridge.RefreshMensagemList()
 
     Executado na tela de conversa
     Lê, no banco de dados, as mensagens trocadas entre o usuário atual e o usuário alvo (identificado por destinatarioId) e instancia cada elemento na interface como um cartão em uma lista
@@ -1233,7 +1233,7 @@ mainThreadInstance
     }
 
     /****************
-    Método RefreshConversasList()
+    Método DataBridge.RefreshConversasList()
 
     Executado na tela de lista de conversas
     Lê, no banco de dados, com que usuários o usuário atual já iniciou uma conversa, e instancia cada elemento na interface como um cartão em uma lista
@@ -1295,7 +1295,7 @@ mainThreadInstance
     }
     
     /****************
-    Método CarregaInfoContrato()
+    Método DataBridge.CarregaInfoContrato()
 
     Executado na tela de informações de contrato.
     Carrega os dados inseridos na criação do contrato para serem exibidos na tela
@@ -1351,7 +1351,7 @@ mainThreadInstance
                                 Debug.Log(tarefa.Exception);
                             }
                             else{
-                                StartCoroutine(LoadImagemUrl(tarefa.Result.ToString(),infoImagem));
+                                StartCoroutine(LoadImagemUrl(tarefa.Result.ToString(),infoImagem,200));
                             }
                         });
 
@@ -1400,7 +1400,7 @@ mainThreadInstance
     }
 
     /****************
-    Método CarregarPerfil()
+    Método DataBridge.CarregarPerfil()
 
     Executado na tela de informações de perfil.
     Carrega os dados inseridos na criação do perfil para serem exibidos na tela
@@ -1449,8 +1449,8 @@ mainThreadInstance
                                 Debug.Log(tarefa.Exception);
                             }
                             else{
-                                StartCoroutine(LoadImagemUrl(tarefa.Result.ToString(),perfImagem));
-                                StartCoroutine(LoadImagemUrl(tarefa.Result.ToString(),perfEditarImagem));
+                                StartCoroutine(LoadImagemUrl(tarefa.Result.ToString(),perfImagem,600));
+                                StartCoroutine(LoadImagemUrl(tarefa.Result.ToString(),perfEditarImagem,600));
                             }
                         });
 
@@ -1464,7 +1464,7 @@ mainThreadInstance
                     perfEditarGenero.text = snapshot.Child("generoUsuario").GetValue(false).ToString();
 
                     //if(globalMenu.GetComponent<MenuController>().GetTitulo().Equals("Meu Perfil"))
-                    if(MenuController.menuControllerInstance.GetTitulo().Equals("MeuPerfil"))
+                    if(MenuController.menuControllerInstance.GetTitulo().Equals("Meu Perfil"))
                     {
                         //perfil deste usuario. habilita botao para editar
                         butPerfEditar.SetActive(true);
@@ -1483,7 +1483,7 @@ mainThreadInstance
 
     //Corrotinas
     /****************
-    Corrotina CooldownHandler()
+    Corrotina DataBridge.CooldownHandler()
 
     Espera 0.1s antes de tentar atualizar lista de mensagens
 
@@ -1506,19 +1506,20 @@ mainThreadInstance
     
 
     /****************
-    Corrotina LoadImagemUrl()
+    Corrotina DataBridge.LoadImagemUrl()
 
     Carrega imagem de uma url e insere como textura na imagem alvo targetImage
 
     Parâmetros:
     -   mediaUrl: url da imagem a ser carregada
     -   targetImage: objeto RawImage exibido na tela, onde se deseja carregar a imagem
+    -   maxSide: tamanho do maior lado da imagem, em pixels
 
     Resultado: 
     -   targetImage passa a exibir a imagem indicada na url inserida
     -   Se ocorrer uma falha no acesso à imagem, um erro é exibido e a operação é cancelada
     ****************/
-    IEnumerator LoadImagemUrl (string mediaUrl, RawImage targetImage)
+    IEnumerator LoadImagemUrl (string mediaUrl, RawImage targetImage, int maxSide)
     {
         //carrega imagem do endereço web
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(mediaUrl);
@@ -1536,13 +1537,13 @@ mainThreadInstance
             
             //ajusta tamanho para manter proporção
             targetImage.rectTransform.sizeDelta= new Vector2(
-                targetImage.texture.width * 600 / Mathf.Max(targetImage.texture.width,targetImage.texture.height),
-                targetImage.texture.height * 600 / Math.Max(targetImage.texture.width,targetImage.texture.height));
+                targetImage.texture.width * maxSide / Mathf.Max(targetImage.texture.width,targetImage.texture.height),
+                targetImage.texture.height * maxSide / Math.Max(targetImage.texture.width,targetImage.texture.height));
         }
     }
 
     /****************
-    Corrotina CreateComission()
+    Corrotina DataBridge.CreateComission()
 
     Salva informações de um contrato válido e sua imagem associada no banco de dados
 
@@ -1661,13 +1662,13 @@ mainThreadInstance
         else{
             //contrato publicado com sucesso. volta a lista de contratos anterior
             RefreshComissionList("-2");
-            path = "";
+            ClearImageField();
 
         }
     }
 
     /****************
-    Corrotina CreateMensagem()
+    Corrotina DataBridge.CreateMensagem()
 
     Salva nova mensagem enviada no banco de dados como nova mensagem 
     Se o remetente e o destinatário nunca tiverem conversado pelo aplicativo anteriormente, também salva a nova conversa
@@ -1721,7 +1722,7 @@ mainThreadInstance
     }
 
     /****************
-    Corrotina CreateInfoUsuario()
+    Corrotina DataBridge.CreateInfoUsuario()
 
     Salva perfil de usuário e sua imagem associada no banco de dados, atualizando suas informações caso ja exista
 
@@ -1778,7 +1779,7 @@ mainThreadInstance
             //CarregarPerfil(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
             CarregarPerfil(AuthController.authInstance.GetCurrentUserId());
 
-            path = "";
+            ClearImageField();
             //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
             MenuController.menuControllerInstance.IrJanelaAnterior();
             PrepareDicNomes();
@@ -1786,7 +1787,7 @@ mainThreadInstance
     }
     
     /****************
-    Corrotina CreateContato()
+    Corrotina DataBridge.CreateContato()
 
     Salva contato no banco de dados
 
@@ -1821,7 +1822,7 @@ mainThreadInstance
     }
 
     /****************
-    Corrotina CreateAval()
+    Corrotina DataBridge.CreateAval()
 
     Salva avaliação no banco de dados
 
@@ -1857,7 +1858,7 @@ mainThreadInstance
 
     //Métodos e funções utilitários
     /****************
-    Método AttemptReadFile()
+    Método DataBridge.AttemptReadFile()
 
     Abre a seleção de arquivos para que o usuário selecione uma imagem para fazer o upload, se tiver concedido permissão, e armazena copia da imagem selecionada no objeto RawImage da tela atual
     Caso contrario, abre painel explicando a necessidade de conceder permissão ao aplicativo
@@ -1916,7 +1917,7 @@ mainThreadInstance
     }
 
     /****************
-    Método PermissionRequestHandler()
+    Método DataBridge.PermissionRequestHandler()
 
     Se o usuário negou acesso aos arquivos do dispositivo permanentemente, redireciona-o à tela de configurações de permissões do celular
     Caso contrário, requisita as permissões de acesso
@@ -1944,7 +1945,7 @@ mainThreadInstance
         }
     }
     /****************
-    Método SetContatoButton()
+    Método DataBridge.SetContatoButton()
 
     Adapta texto do botão da página de contatos dependendo se a lista pertence ao usuário atual ou a outro usuário
 
@@ -1965,7 +1966,7 @@ mainThreadInstance
     }
 
     /****************
-    Método ContatoButtonHandler()
+    Método DataBridge.ContatoButtonHandler()
 
     Adapta função do botão da página de contatos dependendo se a lista pertence ao usuário atual ou a outro usuário
 
@@ -2001,7 +2002,7 @@ mainThreadInstance
     
 
     /****************
-    Método ReactivateFilterHandler()
+    Método DataBridge.ReactivateFilterHandler()
 
     Atuali1za checkboxes da janela de filtros, desativando caixas de dias da semana se a opção for desselecionada e reabilitando quando marcada novamente
 
@@ -2038,7 +2039,7 @@ mainThreadInstance
     }
 
     /****************
-    Método ConversaListenHandler()
+    Método DataBridge.ConversaListenHandler()
 
     Método executado em resposta à adição de nova mensagem na conversa no banco de dados
 
@@ -2063,29 +2064,9 @@ mainThreadInstance
             StartCoroutine(CooldownHandler());
         }
     }
-
-    /****************
-    Método SalvarImagemHandler()
-
-    Verifica se a URL usada para um upload de imagem é válida, carregando a prévia no objeto RawImage associado da tela caso positivo
-
-    Parâmetros:
-    -   idPagina: numeração usada para identificar página em que o upload da imagem está sendo feito. 1= edição de perfil. 2= edição de contrato. Qualquer outro valor exibe erro e cancela a operação
-
-    Entrada:
-    -   newURLImagem: caixa de texto onde é inserida a url da imagem a ser transferida para contrato
-
-    Resultado: 
-    -   se a url endereça uma imagem .png, o objeto rawImage da tela atual passa a exibir a imagem na url.
-    ****************/
-    public void SalvarImagemHandler()
-    {
-        StartCoroutine(LoadImagemUrl(path,perfEditarImagem));
-    }
-
     
     /****************
-    Método ClearImageField()
+    Método DataBridge.ClearImageField()
 
     Limpa todas as imagens de prévia, retornando à imagem em branco padrão, e limpa a memória do caminho para imagem a ser transferida
 
@@ -2101,12 +2082,13 @@ mainThreadInstance
     {
         path = "";
         perfEditarImagem.texture = new Texture2D(600,600) as Texture;
+        infoImagem.texture = new Texture2D(600,600) as Texture;
         newImagem.texture = new Texture2D(600,600) as Texture;
     }
     
     //limpa filtros de exibição de contrato para exibir todos. mantem apenas classe como "Comissão" ou "Serviço" pois telas são separadas
     /****************
-    Método ClearFiltros()
+    Método DataBridge.ClearFiltros()
 
     Restaura todos os filtros para seus valores padrâo, permitindo novamente a exibição de todos os contratos do sistema
 
@@ -2155,7 +2137,7 @@ mainThreadInstance
     }
 
     /****************
-    Função StringToFloat()
+    Função DataBridge.StringToFloat()
 
     Converte a string recebida como parâmetro em valor float equivalente ao digitado
 
@@ -2176,7 +2158,7 @@ mainThreadInstance
     }
 
     /****************
-    Função ComparePrecos()
+    Função DataBridge.ComparePrecos()
 
     Compara dois floats, retornando um int indicativo do resultado da comparação
 
@@ -2203,7 +2185,7 @@ mainThreadInstance
     }
 
     /****************
-    Método ValidarFiltrosPrecos()
+    Método DataBridge.ValidarFiltrosPrecos()
 
     Valida os valores inseridos como filtros de preço, evitando que o menor seja inferior a 0 ou superior ao maior e que qualquer um seja inferior a 0
 
@@ -2226,7 +2208,7 @@ mainThreadInstance
     }
 
     /****************
-    Função MakeTokensValid()
+    Função DataBridge.MakeTokensValid()
 
     Alguns caracteres não são válidos para nomear endereços do banco de dados Firebase. O caractére '.' (ponto) é um deles
     O email é a chave identificadora de um usuário, que sempre possui '.' mas por sua vez não aceita '"' (aspas duplas) como caractere
@@ -2253,7 +2235,7 @@ mainThreadInstance
     }
 
     /****************
-    Função SortStringsAlpha()
+    Função DataBridge.SortStringsAlpha()
 
     Concatena ambas strings dadas como parâmetro em uma única string, na qual a primeira em ordem alfabética é a primeira digitada no resultado
 
@@ -2273,7 +2255,7 @@ mainThreadInstance
     }
 
     /****************
-    Métodos IrConversaContrato()
+    Métodos DataBridge.IrConversaContrato()
 
     Executado a partir da janela de informações de um contrato
     Registra uma visitação da janela de conversa na pilha de navegação da classe MenuController, permitindo a ela ao voltar para tela anterior posteriormente
@@ -2302,7 +2284,7 @@ mainThreadInstance
     }
 
     /****************
-    Métodos IrPerfilContrato()
+    Métodos DataBridge.IrPerfilContrato()
 
     Registra uma visitação da janela de perfil na pilha de navegação da classe MenuController, permitindo a ela ao voltar para tela anterior posteriormente
 
@@ -2326,7 +2308,7 @@ mainThreadInstance
     }
 
     /****************
-    Métodos IrMensagemList()
+    Métodos DataBridge.IrMensagemList()
 
     Registra uma visitação da janela de conversa na pilha de navegação da classe MenuController, permitindo a ela ao voltar para tela anterior posteriormente
 
@@ -2354,7 +2336,7 @@ mainThreadInstance
 
     //Métodos de exclusão de dados
     /****************
-    Métodos RemoveComission()
+    Métodos DataBridge.RemoveComission()
 
     Exclui um contrato do banco de dados
 
@@ -2370,7 +2352,7 @@ mainThreadInstance
     }
 
     /****************
-    Métodos RemoveContato()
+    Métodos DataBridge.RemoveContato()
 
     Exclui um contato do banco de dados
 
@@ -2388,7 +2370,7 @@ mainThreadInstance
     }
 
     /****************
-    Métodos RemoveListener()
+    Métodos DataBridge.RemoveListener()
 
     Ao sair da tela de conversa, desabilita o listener responsável por manter a conversa atualizada
 

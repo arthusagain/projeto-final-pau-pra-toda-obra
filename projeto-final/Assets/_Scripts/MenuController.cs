@@ -108,6 +108,7 @@ public class MenuController : MonoBehaviour
 
     Resultado: 
     -   o título da página se mantém atualizado de acordo com o conteúdo de textoTituloPagina
+    -   se o botão "anterior" nativo do celular for pressionado, retorna à tela anterior
     ****************/
     void Update()
     {
