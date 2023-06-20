@@ -2,16 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
 using UnityEngine.Networking;
+using UnityEditor;
 using Firebase;
 using Firebase.Database;
 using Firebase.Extensions;
 using Firebase.Auth;
 using Firebase.Storage;
-using SimpleFileBrowser;
 
 public class DataBridge : MonoBehaviour
 {
@@ -44,9 +44,10 @@ public class DataBridge : MonoBehaviour
     * Dicionários utilitários
     -   dicNomesUsuarios: Relação e-mail->nome de usuários, evitando acessos excessivos ao banco de dados
     * Referências básicas para uso do Firebase:
-    -   dbRef
-    -   storage
-    -   storageRef
+    -   dbRef: referencia para raiz do banco de dados Firebase
+    -   storageRef: referencia para armazenamento de imagens do Firebase
+    * Referencias de GameObjects do Unity:
+    -   permissionPanel: painel que exibe explicação para o usuário sobre necessidade da permissão de acesso aos arquivos do sistema
     * Referencias dos elementos da tela de perfil
     -   perfilPanel: a tela de exibição de perfil
     -   perfNomeUser: texto que exibe nome do usuário dono do perfil
@@ -56,7 +57,6 @@ public class DataBridge : MonoBehaviour
     -   perfGenero: texto que exibe gênero do usuário dono do perfil
     -   perfImagem: texto que exibe imagem do usuário dono do perfil
     * Referencias dos elementos da tela de editar perfil
-    -   perfURLImagem: URL inserida pelo usuário indicando endereço web da imagem a ser associada ao perfil
     -   perfEditarNome: campo de texto para editar nome de exibição do usuário
     -   perfEditarIdade: campo de texto para editar idade do usuário a ser exibida no perfil
     -   perfEditarGenero: campo de texto para editar gênero do usuário a ser exibido no perfil
@@ -159,14 +159,11 @@ public class DataBridge : MonoBehaviour
 
     [Header("Referencias Firebase")]
     public DatabaseReference dbRef;
-    public FirebaseStorage storage;
     public StorageReference storageRef;
 
-    /*[Header("Outros controladores")]
+    [Header("Permissões")]
     [SerializeField]
-    private GameObject globalMenu;
-    [SerializeField]
-    private GameObject authControllerObj;*/
+    private GameObject PermissionPanel;
     
     [Header("Perfil")]
     [SerializeField]
@@ -185,8 +182,6 @@ public class DataBridge : MonoBehaviour
     private RawImage perfImagem;
 
     [Header("Editar Perfil")]
-    [SerializeField]
-    private InputField perfURLImagem;
     [SerializeField]
     private InputField perfEditarNome;
     [SerializeField]
@@ -378,8 +373,7 @@ public class DataBridge : MonoBehaviour
     private void Start() {
         //prepara referencias de endereços dos arquivos do aplicativo no servidor do firebase
         dbRef=FirebaseDatabase.DefaultInstance.RootReference;
-        storage = FirebaseStorage.DefaultInstance;
-        storageRef = storage.GetReferenceFromUrl("gs://pau-pra-toda-obra.appspot.com/");
+        storageRef = FirebaseStorage.DefaultInstance.GetReferenceFromUrl("gs://pau-pra-toda-obra.appspot.com/");
 
         //prepara dicionário 
         PrepareDicNomes();
@@ -388,8 +382,8 @@ public class DataBridge : MonoBehaviour
         //descartado por ter problemas no android. mantido como comentario para possivel melhoria em versões futuras
         /*FileBrowser.SetFilters( true, new FileBrowser.Filter( "Images", ".png"));
 		FileBrowser.SetDefaultFilter( ".png" );
-		FileBrowser.SetExcludedExtensions( ".lnk", ".tmp", ".zip", ".rar", ".exe", ".jpg", ".jpeg", ".txt", ".pdf" );
-        */
+		FileBrowser.SetExcludedExtensions( ".lnk", ".tmp", ".zip", ".rar", ".exe", ".jpg", ".jpeg", ".txt", ".pdf" );*/
+        
     }   
 
     /****************
@@ -1509,26 +1503,7 @@ mainThreadInstance
         RefreshMensagemList(MenuController.menuControllerInstance.GetAux());
     }
 
-    //abre caixa de dialogo para navegar nos arquivos do dispositivo e escolher imagem. carrega imagem escolhida como textura de targetRawImage
-    /*IEnumerator ShowLoadDialogCoroutine(RawImage targetRawImage)
-    {//método não usado pois estava dando problemas com android. mantida no comentário para possiveis melhorias em versões futuras do app
-        yield return FileBrowser.WaitForLoadDialog( FileBrowser.PickMode.FilesAndFolders, false, null, null, "Escolha uma imagem para inserir", "Selecionar" );
-        
-        if( FileBrowser.Success )
-		{
-            //salva caminho do arquivo selecionado.
-            path = FileBrowser.Result[0];
-
-            //carrega imagem selecionada no display de exemplo
-            Texture2D placeholderTexture = new Texture2D(200,200);
-            placeholderTexture.LoadImage(FileBrowserHelpers.ReadBytesFromFile(FileBrowser.Result[0]));
-            targetRawImage.texture = placeholderTexture as Texture;
-
-		}
-        else{
-            authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A seleção de imagem foi cancelada.");
-        }
-    }*/
+    
 
     /****************
     Corrotina LoadImagemUrl()
@@ -1561,7 +1536,6 @@ mainThreadInstance
         }
     }
 
-    //salva contrato e sua imagem associada no banco
     /****************
     Corrotina CreateComission()
 
@@ -1875,7 +1849,91 @@ mainThreadInstance
         }
     }
 
-    //Métodos e funções utilitários/
+
+    //Métodos e funções utilitários
+    /****************
+    Método AttemptReadFile()
+
+    Abre a seleção de arquivos para que o usuário selecione uma imagem para fazer o upload, se tiver concedido permissão, e armazena copia da imagem selecionada no objeto RawImage da tela atual
+    Caso contrario, abre painel explicando a necessidade de conceder permissão ao aplicativo
+
+    Entrada:
+    -   PermissionPanel: painel com explicação da necessidade de conceder permissão de acesso aos arquivos do dispostivo
+
+    Resultado: 
+    -   se acesso foi concedido, será exibida uma seleção para o usuário escolher o arquivo de imagem .png a ser utilizado
+    -   se um arquivo valido foi selecinado, a imagem é copiada para o objeto RawImage de prévia da tela atual
+    -   se permissão ainda não foi concedida ao aplicativo, um painel é exibido, com texto explicando a necessidade de conceder permissão
+    ****************/
+    public void AttemptReadFile()
+    {
+        if(NativeFilePicker.CheckPermission()!=NativeFilePicker.Permission.Granted)
+        {
+            PermissionPanel.SetActive(true);
+            return;
+        }
+        if( NativeFilePicker.IsFilePickerBusy() )
+			return;
+        NativeFilePicker.PickFile( (filePath)=>
+        {
+            if(filePath == "")
+            {
+                Debug.Log("Seleção de imagem cancelada");
+                return;
+            }
+
+            RawImage targetRawImage;
+            if(MenuController.menuControllerInstance.GetTitulo() == "Editar Meu Perfil")
+            {
+                //imagem a ser transferida como nova imagem de perfil
+                targetRawImage = perfEditarImagem;
+            }
+            else{
+                //imagem a ser transferida como nova imagem de contrato
+                targetRawImage = newImagem;
+            }
+
+            Texture2D placeholderTexture = new Texture2D(2,2);
+            placeholderTexture.LoadImage(File.ReadAllBytes(filePath));
+            targetRawImage.texture = placeholderTexture as Texture;
+
+            //redimensiona nova imagem para manter proporção da original
+            targetRawImage.rectTransform.sizeDelta= new Vector2(
+                targetRawImage.texture.width * 200 / Mathf.Max(targetRawImage.texture.width,targetRawImage.texture.height),
+                targetRawImage.texture.height * 200 / Mathf.Max(targetRawImage.texture.width,targetRawImage.texture.height));
+            path = filePath;
+        }
+        ,"image/png");
+    }
+
+    /****************
+    Método PermissionRequestHandler()
+
+    Se o usuário negou acesso aos arquivos do dispositivo permanentemente, redireciona-o à tela de configurações de permissões do celular
+    Caso contrário, requisita as permissões de acesso
+
+    Entrada:
+    -   PermissionPanel: painel com explicação da necessidade de conceder permissão de acesso aos arquivos do dispostivo
+
+    Resultado: 
+    -   se usuário anteriormente selecionou "não perguntar novamente" quando permissão foi pedida, redireciona-o para as configurações do celular de permissoes do aplicativo
+    -   
+    ****************/
+    public void PermissionRequestHandler()
+    {
+        if(NativeFilePicker.CheckPermission()==NativeFilePicker.Permission.Denied)
+        {
+            NativeFilePicker.OpenSettings();
+        }
+        else
+        {
+            if (NativeFilePicker.RequestPermission() == NativeFilePicker.Permission.Granted)
+            {
+                PermissionPanel.SetActive(false);
+                AttemptReadFile();
+            }
+        }
+    }
     /****************
     Método SetContatoButton()
 
@@ -1930,6 +1988,8 @@ mainThreadInstance
             msgListaPanel.SetActive(true);
         }
     }
+
+    
 
     /****************
     Método ReactivateFilterHandler()
@@ -1995,13 +2055,6 @@ mainThreadInstance
         }
     }
 
-    //abre explorador de arquivos para selecionar imagem a ser salva no sistema
-    /*public void OpenFileExplorer(RawImage targetRawImage)
-    {//função não usada pois estava dando problemas com android. mantida no comentário para possiveis melhorias em versões futuras do app
-        StartCoroutine(ShowLoadDialogCoroutine(targetRawImage));
-        return;
-    }*/
-
     /****************
     Método SalvarImagemHandler()
 
@@ -2011,54 +2064,40 @@ mainThreadInstance
     -   idPagina: numeração usada para identificar página em que o upload da imagem está sendo feito. 1= edição de perfil. 2= edição de contrato. Qualquer outro valor exibe erro e cancela a operação
 
     Entrada:
-    -   perfURLImagem: caixa de texto onde é inserida a url da imagem a ser transferida para perfil
     -   newURLImagem: caixa de texto onde é inserida a url da imagem a ser transferida para contrato
 
     Resultado: 
     -   se a url endereça uma imagem .png, o objeto rawImage da tela atual passa a exibir a imagem na url.
     ****************/
-    public void SalvarImagemHandler(int idPagina)
+    public void SalvarImagemHandler()
     {
-        switch (idPagina)
-        {
-            case 1:
-                if(perfURLImagem.text.Substring(perfURLImagem.text.Length-4).Equals(".png"))
-                {
-                    path = perfURLImagem.text;
-                    StartCoroutine(LoadImagemUrl(perfURLImagem.text,perfEditarImagem));
-                }
-                else{
-                    //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A imagem deve ser um arquivo .png");
-                    AuthController.authInstance.RaiseErrorPanel("A imagem deve ser um arquivo .png");
-                }
-                break;
-            case 2:
-                if(newURLImagem.text.Substring(newURLImagem.text.Length-4).Equals(".png"))
-                {
-                    path = newURLImagem.text;
-                    StartCoroutine(LoadImagemUrl(newURLImagem.text,newImagem));
-                }
-                else{
-                    //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A imagem deve ser um arquivo .png");AuthController.authInstance.
-                    AuthController.authInstance.RaiseErrorPanel("A imagem deve ser um arquivo .png");
-                }
-                break;
-            default:
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Opa, você não devia ter acesso ao upload de imagem nessa página.");
-                AuthController.authInstance.RaiseErrorPanel("Opa, você não devia ter acesso ao upload de imagem nessa página.");
-            break;
-        }
+        StartCoroutine(LoadImagemUrl(path,perfEditarImagem));
     }
 
-    //limpa path para evitar sujeira nas publicações de arquivos
-    /*public void ClearImageField()
+    
+    /****************
+    Método ClearImageField()
+
+    Limpa todas as imagens de prévia, retornando à imagem em branco padrão, e limpa a memória do caminho para imagem a ser transferida
+
+    Entrada:
+    -   path: caixa de texto onde é inserida a url da imagem a ser transferida para perfil
+    -   perfEditarImagem: prévia da imagem na tela de criação de novo perfil
+    -   newImagem: prévia da imagem na tela de criação de novo contrato
+
+    Resultado: 
+    -   as imagens de prévia voltam a ser um quadrado branco. O caminho para a imagem a ser transferida é apagado
+    ****************/
+    public void ClearImageField()
     {
         path = "";
-    }*/
+        perfEditarImagem.texture = new Texture2D(200,200) as Texture;
+        newImagem.texture = new Texture2D(200,200) as Texture;
+    }
     
     //limpa filtros de exibição de contrato para exibir todos. mantem apenas classe como "Comissão" ou "Serviço" pois telas são separadas
     /****************
-    Método SalvarImagemHandler()
+    Método ClearFiltros()
 
     Restaura todos os filtros para seus valores padrâo, permitindo novamente a exibição de todos os contratos do sistema
 

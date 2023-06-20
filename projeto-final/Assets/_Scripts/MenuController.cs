@@ -324,7 +324,7 @@ public class MenuController : MonoBehaviour
     }
 
     /****************
-    Funçãoi GetTitulo()
+    Função GetTitulo()
 
     Retorna o título da tela atual para uso em outras classes
 
@@ -348,14 +348,4 @@ public class MenuController : MonoBehaviour
     {
         return sAux.Peek();
     }
-
-    
-    /****************
-    Funçãoi GetTitulo()
-
-    Retorna o valor auxiliar atual para uso em outras classes
-
-    Resultado: 
-    -   retorna o valor auxiliar atual
-    ****************/
 }

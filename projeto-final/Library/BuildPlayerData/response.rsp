@@ -10,6 +10,7 @@
 -a="C:\Users\ARTHUS-LAPTOP\Documents\GitHub\projeto-final\projeto-final\Library\PlayerScriptAssemblies\SimpleFileBrowser.Runtime.dll"
 -a="C:\Users\ARTHUS-LAPTOP\Documents\GitHub\projeto-final\projeto-final\Library\PlayerScriptAssemblies\Unity.2D.Animation.Triangle.Runtime.dll"
 -a="C:\Users\ARTHUS-LAPTOP\Documents\GitHub\projeto-final\projeto-final\Library\PlayerScriptAssemblies\Unity.2D.Animation.Runtime.dll"
+-a="C:\Users\ARTHUS-LAPTOP\Documents\GitHub\projeto-final\projeto-final\Library\PlayerScriptAssemblies\NativeFilePicker.Runtime.dll"
 -a="C:\Users\ARTHUS-LAPTOP\Documents\GitHub\projeto-final\projeto-final\Library\PlayerScriptAssemblies\Unity.2D.Common.Runtime.dll"
 -a="C:\Users\ARTHUS-LAPTOP\Documents\GitHub\projeto-final\projeto-final\Library\PlayerScriptAssemblies\Unity.2D.SpriteShape.Runtime.dll"
 -a="C:\Users\ARTHUS-LAPTOP\Documents\GitHub\projeto-final\projeto-final\Assets\Parse\Plugins\Unity.Compat.dll"
