@@ -385,7 +385,7 @@ ScriptsOnlyBuild:
     className: TextMeshProUGUI
   - hash:
       serializedVersion: 2
-      Hash: cb0c4c5fe0f29c74faca6295679fca10
+      Hash: 1254c19aa1c07a86a825638bdb6e5ff0
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: AuthController
