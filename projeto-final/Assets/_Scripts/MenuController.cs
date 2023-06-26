@@ -116,7 +116,7 @@ public class MenuController : MonoBehaviour
         tituloPagina.GetComponent<Text>().text = textoTituloPagina;
 
         //ativar retorno caso botão nativo do celular seja precionado
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if(Input.GetKeyDown(KeyCode.Escape) && sTitulos.Peek() != "Criar meu perfil")
         {
             IrJanelaAnterior();
         }

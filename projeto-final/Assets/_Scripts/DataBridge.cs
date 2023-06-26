@@ -1573,10 +1573,10 @@ mainThreadInstance
     {
         //salva imagem
         string newImagePath = "";
-        if (path != "" && path != null && path.Substring(path.Length-4).Equals(".png"))
+        if (path != "" && path != null)
         {
             //usa horário atual com 4 casas decimais de precisão como nome efetivamente único para o arquivo da imagem, e tenta enviar para o servidor
-            newImagePath = DateTime.Now.ToString("yyyyMMddHHmmssffff-"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId()))+".png";
+            newImagePath = DateTime.Now.ToString("yyyyMMddHHmmssffff-"+AuthController.authInstance.GetCurrentUserId())+".png";
             storageRef.Child(newImagePath).PutBytesAsync(((Texture2D)newImagem.texture).EncodeToPNG()).ContinueWithOnMainThread(tarefa => {
                 if(tarefa.IsFaulted || tarefa.IsCanceled){
                     //se falhar a publicar a imagem, salva contrato sem imagem
@@ -1742,10 +1742,11 @@ mainThreadInstance
     {
         //salva imagem
         string newImagePath = "";
-        if (path != "" && path != null && path.Substring(path.Length-4).Equals(".png"))
+        if (path != "" && path != null)
         {
+            Debug.Log("Imagem válida");
             //usa horário atual com 4 casas decimais de precisão como nome efetivamente único para o arquivo da imagem, e tenta enviar para o servidor
-            newImagePath = DateTime.Now.ToString("yyyyMMddHHmmssffff")+".png";
+            newImagePath = DateTime.Now.ToString("yyyyMMddHHmmssffff-"+AuthController.authInstance.GetCurrentUserId())+".png";
             storageRef.Child(newImagePath).PutBytesAsync(((Texture2D)perfEditarImagem.texture).EncodeToPNG()).ContinueWithOnMainThread(tarefa => {
                 if(tarefa.IsFaulted || tarefa.IsCanceled){
                     //se falhar a publicar a imagem, salva perfil sem imagem
@@ -1757,6 +1758,7 @@ mainThreadInstance
         }
         else 
         {
+            Debug.Log("Sem imagem");
             newImagePath = "";
         }
         //cria novo objeto InfoUsuario, converte para dicionário e publica no caminho adequado no servidor firebase
@@ -1893,7 +1895,7 @@ mainThreadInstance
 
             //obtem imagem a partir do caminho do arquivo
             RawImage targetRawImage;
-            if(MenuController.menuControllerInstance.GetTitulo() == "Editar Meu Perfil")
+            if(MenuController.menuControllerInstance.GetTitulo() == "Editar Perfil" || MenuController.menuControllerInstance.GetTitulo() == "Criar meu perfil")
             {
                 //imagem a ser transferida como nova imagem de perfil
                 targetRawImage = perfEditarImagem;
@@ -2082,8 +2084,17 @@ mainThreadInstance
     {
         path = "";
         perfEditarImagem.texture = new Texture2D(600,600) as Texture;
-        infoImagem.texture = new Texture2D(600,600) as Texture;
+            perfEditarImagem.rectTransform.sizeDelta= new Vector2(
+                perfEditarImagem.texture.width * 600 / Mathf.Max(perfEditarImagem.texture.width,perfEditarImagem.texture.height),
+                perfEditarImagem.texture.height * 600 / Math.Max(perfEditarImagem.texture.width,perfEditarImagem.texture.height));
+        /*infoImagem.texture = new Texture2D(600,600) as Texture;
+            infoImagem.rectTransform.sizeDelta= new Vector2(
+                infoImagem.texture.width * 600 / Mathf.Max(infoImagem.texture.width,infoImagem.texture.height),
+                infoImagem.texture.height * 600 / Math.Max(infoImagem.texture.width,infoImagem.texture.height));*/
         newImagem.texture = new Texture2D(600,600) as Texture;
+            newImagem.rectTransform.sizeDelta= new Vector2(
+                newImagem.texture.width * 600 / Mathf.Max(newImagem.texture.width,newImagem.texture.height),
+                newImagem.texture.height * 600 / Math.Max(newImagem.texture.width,perfEditarImagem.texture.height));
     }
     
     //limpa filtros de exibição de contrato para exibir todos. mantem apenas classe como "Comissão" ou "Serviço" pois telas são separadas
