@@ -50,10 +50,6 @@ public class MenuController : MonoBehaviour
     private GameObject contratosMenu;
     [SerializeField]
     private GameObject mensagensMenu;
-    /*
-    [SerializeField]
-    private GameObject databridgeObj;
-    private DataBridge databridge;*/
 
     Stack<string> sTitulos = new Stack<string>();
     Stack<GameObject> sJanelas = new Stack<GameObject>();
@@ -93,7 +89,6 @@ public class MenuController : MonoBehaviour
     ****************/
     void Start()
     {
-        //databridge = databridgeObj.GetComponent<DataBridge>();
         textoTituloPagina = "Menu Principal";
         sTitulos.Push("Menu Principal");
         sJanelas.Push(janelaInicio);
@@ -186,7 +181,6 @@ public class MenuController : MonoBehaviour
         //se está saindo da janela de troca de mensagens, para de ouvir por atualizações na lista de mensagens
         if(sJanelas.Peek()==mensagensMenu)
         {
-            //databridge.RemoveListener(sAux.Peek());
             DataBridge.dataBridgeInstance.RemoveListener(sAux.Peek());
         }
 
@@ -201,35 +195,28 @@ public class MenuController : MonoBehaviour
         switch(sTitulos.Peek())
         {
             case "Contratos deste usuário":
-                //databridge.RefreshComissionUsuarioList();
                 DataBridge.dataBridgeInstance.RefreshComissionUsuarioList();
                 break;
             case "Meu Perfil":
-                //databridge.CarregarPerfil(sAux.Peek());
                 DataBridge.dataBridgeInstance.CarregarPerfil(sAux.Peek());
                 break;
             case "Avaliações":
-                //databridge.RefreshAvaliacaoList();
                 DataBridge.dataBridgeInstance.RefreshAvaliacaoList();
                 break;
             case "Serviços Disponíveis":
-                //databridge.RefreshComissionList("Serviço");
                 DataBridge.dataBridgeInstance.RefreshComissionList("Serviço");
                 Debug.Log("Voltando para lista de serviços");
                 break;
             case "Comissões Disponíveis":
-                //databridge.RefreshComissionList("Comissão");
                 DataBridge.dataBridgeInstance.RefreshComissionList("Comissão");
                 Debug.Log("Voltando para lista de comissões");
                 break;
             case "Minhas Conversas":
-                //databridge.RefreshConversasList();
                 DataBridge.dataBridgeInstance.RefreshConversasList();
                 break;
             default://se auxiliar começa com '-', é uma chave única de informações de contrato
                 if(sAux.Peek().Length > 0 && sAux.Peek()[0].Equals("-"))
                 {
-                    //databridge.CarregaInfoContrato(sAux.Peek(), true);
                     DataBridge.dataBridgeInstance.CarregaInfoContrato(sAux.Peek(), true);
                 }
                 break;

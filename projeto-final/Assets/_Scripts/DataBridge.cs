@@ -377,13 +377,6 @@ public class DataBridge : MonoBehaviour
 
         //prepara dicionário 
         PrepareDicNomes();
-
-        //prepara navegador de arquivos para exibir apenas imagens .png
-        //descartado por ter problemas no android. mantido como comentario para possivel melhoria em versões futuras
-        /*FileBrowser.SetFilters( true, new FileBrowser.Filter( "Images", ".png"));
-		FileBrowser.SetDefaultFilter( ".png" );
-		FileBrowser.SetExcludedExtensions( ".lnk", ".tmp", ".zip", ".rar", ".exe", ".jpg", ".jpeg", ".txt", ".pdf" );*/
-        
     }   
 
     /****************
@@ -432,7 +425,6 @@ public class DataBridge : MonoBehaviour
         dbRef.Child("infoUsuario").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao preparar cache de nomes de de usuarios");
                 AuthController.authInstance.RaiseErrorPanel("Erro ao preparar cache de nomes de de usuarios");
             }
             else if (tarefa.IsCompleted)
@@ -472,7 +464,6 @@ public class DataBridge : MonoBehaviour
     {
         if(newTitulo.text.Equals("")||newEstado.value == 0||newCidade.value == 0||newPreco.text.Equals("")||StringToFloat(newPreco.text)<=0)
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Alguns campos obrigatórios não foram preenchidos");
             AuthController.authInstance.RaiseErrorPanel("Alguns campos obrigatórios não foram preenchidos");
             return;
         }
@@ -492,7 +483,6 @@ mainThreadInstance
     ****************/
     public void SalvarAvaliacao()
     {
-        //StartCoroutine(CreateAval(globalMenu.GetComponent<MenuController>().GetAux()));
         StartCoroutine(CreateAval(MenuController.menuControllerInstance.GetAux()));
         
     }
@@ -516,7 +506,6 @@ mainThreadInstance
     {
         if(perfEditarNome.text.Equals(""))
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Nome obrigatório!");
             AuthController.authInstance.RaiseErrorPanel("Nome obrigatório!");
             return;
         }
@@ -542,13 +531,11 @@ mainThreadInstance
     {
         if(contEditarTipo.text.Equals(""))
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Tipo de contato obrigatório!");
             AuthController.authInstance.RaiseErrorPanel("Tipo de contato obrigatório!");
             return;
         }
         if(contEditarValor.text.Equals(""))
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Informação de contato obrigatória!");
             AuthController.authInstance.RaiseErrorPanel("Informação de contato obrigatória!");
             return;
         }
@@ -571,11 +558,9 @@ mainThreadInstance
     {
         if (newMensagem.text.Equals(""))
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("A mensagem não pode ser vazia!");
             AuthController.authInstance.RaiseErrorPanel("A mensagem não pode ser vazia!");
             return;
         }
-        //StartCoroutine(CreateMensagem(globalMenu.GetComponent<MenuController>().GetAux(), newMensagem.text));
         StartCoroutine(CreateMensagem(MenuController.menuControllerInstance.GetAux(), newMensagem.text));
         
 
@@ -604,7 +589,6 @@ mainThreadInstance
         //se idUsuário == -2, copia idUsuario utilizado para recuperar dados da tela anterior
         if(idUsuario.Equals("-2"))
         {
-            //idUsuario=globalMenu.GetComponent<MenuController>().GetAux();
             idUsuario=MenuController.menuControllerInstance.GetAux();
         }
 
@@ -620,9 +604,7 @@ mainThreadInstance
         dbRef.Child("contato/"+MakeTokensValid(idUsuario)).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar contatos. Tente novamente mais tarde.");
                 AuthController.authInstance.RaiseErrorPanel("Erro ao carregar contatos. Tente novamente mais tarde.");
-                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
                 MenuController.menuControllerInstance.IrJanelaAnterior();
             }
             else if (tarefa.IsCompleted){
@@ -648,7 +630,6 @@ mainThreadInstance
                             Destroy(contatoInstance);});
 
                         //apenas exibe botão de remover contato caso usuário esteja acessando a própria lista de contatos
-                        //if(idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
                         if(idUsuario.Equals(AuthController.authInstance.GetCurrentUserId()))
                         {
                             contatoInstance.transform.Find("DeleteButton").gameObject.SetActive(true);
@@ -731,8 +712,6 @@ mainThreadInstance
         dbRef.Child("comission").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista de contratos. Tente novamente mais tarde.");
-                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
                 AuthController.authInstance.RaiseErrorPanel("Erro ao carregar lista de contratos. Tente novamente mais tarde.");
                 MenuController.menuControllerInstance.IrJanelaAnterior();
             }
@@ -978,7 +957,6 @@ mainThreadInstance
     {
         //atualiza dicionário de nomes caso nome de algum usuário tenha sido modificado desde o inicio da sessão
         PrepareDicNomes();
-        //string idUsuario = globalMenu.GetComponent<MenuController>().GetAux();
         string idUsuario = MenuController.menuControllerInstance.GetAux();
         
         //remove dados instanciados na ultima chamada do método
@@ -993,8 +971,6 @@ mainThreadInstance
         dbRef.Child("comission").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista de contratos deste usuário. Tente novamente mais tarde.");
-                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
                 AuthController.authInstance.RaiseErrorPanel("Erro ao carregar lista de contratos deste usuário. Tente novamente mais tarde.");
                 MenuController.menuControllerInstance.IrJanelaAnterior();
             }
@@ -1051,7 +1027,6 @@ mainThreadInstance
                         });
 
                         //só exibe botão de deletar contrato caso esteja olhando a própria lista de contratos
-                        //if(idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
                         if(idUsuario.Equals(AuthController.authInstance.GetCurrentUserId()))
                         {
                             comissionInstance.transform.GetChild(14).gameObject.SetActive(true);
@@ -1103,9 +1078,7 @@ mainThreadInstance
         PrepareDicNomes();
 
         //se estiver olhando a própria lista de avaliações, esconde a opção de publicar sua avaliação. exibe caso contrário
-        //string idUsuario = globalMenu.GetComponent<MenuController>().GetAux();
         string idUsuario = MenuController.menuControllerInstance.GetAux();
-        //if (idUsuario.Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
         if (idUsuario.Equals(AuthController.authInstance.GetCurrentUserId()))
         {
             avalButton.SetActive(false);
@@ -1126,8 +1099,6 @@ mainThreadInstance
         dbRef.Child("avaliacao/"+MakeTokensValid(idUsuario)).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar avaliações. Tente novamente mais tarde");
-                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
                 AuthController.authInstance.RaiseErrorPanel("Erro ao carregar avaliações. Tente novamente mais tarde");
                 MenuController.menuControllerInstance.IrJanelaAnterior();
             }
@@ -1174,13 +1145,8 @@ mainThreadInstance
         //se destinatárioId for -2, carrega id de último usuário acessado e empilha no MenuController os valores adequados para preparar a tela de troca de mensagem 
         if(destinatarioId.Equals("-2"))
         {
-            //destinatarioId = globalMenu.GetComponent<MenuController>().GetAux();
             destinatarioId = MenuController.menuControllerInstance.GetAux();
             
-            /*implementação antiga sem singleton
-            globalMenu.GetComponent<MenuController>().IrNovoAux(globalMenu.GetComponent<MenuController>().GetAux());
-            globalMenu.GetComponent<MenuController>().IrNovoTitulo("Conversa com "+dicNomesUsuarios[destinatarioId]);
-            globalMenu.GetComponent<MenuController>().IrNovaJanela(msgListaPanel);*/
             MenuController.menuControllerInstance.IrNovoAux(MenuController.menuControllerInstance.GetAux());
             MenuController.menuControllerInstance.IrNovoTitulo("Conversa com "+dicNomesUsuarios[destinatarioId]);
             MenuController.menuControllerInstance.IrNovaJanela(msgListaPanel);
@@ -1196,7 +1162,6 @@ mainThreadInstance
         }
 
         //carrega dados do servidor
-        //dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), destinatarioId))).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
         dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), destinatarioId))).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
@@ -1255,12 +1220,9 @@ mainThreadInstance
         }
 
         //recebe dados do banco
-        //dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())+"/conversas").GetValueAsync().ContinueWithOnMainThread(tarefa =>{
         dbRef.Child("infoUsuario/"+MakeTokensValid(AuthController.authInstance. GetCurrentUserId())+"/conversas").GetValueAsync().ContinueWithOnMainThread(tarefa =>{   
             if(tarefa.IsFaulted)
             {
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar lista conversas. Tente novamente mais tarde");
-                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
                 AuthController.authInstance.RaiseErrorPanel("Erro ao carregar lista conversas. Tente novamente mais tarde"); 
                 MenuController.menuControllerInstance.IrJanelaAnterior();
             }
@@ -1315,8 +1277,6 @@ mainThreadInstance
         //empilha valor auxiliar e objeto da tela atual. titulo é empilhado posteriormente pois é o titulo do contrato buscado
         if(!isRetorno)
         {
-            //globalMenu.GetComponent<MenuController>().IrNovoAux(keyContrato);
-            //globalMenu.GetComponent<MenuController>().IrNovaJanela(infoPanel);
             MenuController.menuControllerInstance.IrNovoAux(keyContrato);
             MenuController.menuControllerInstance.IrNovaJanela(infoPanel);
         }
@@ -1324,14 +1284,11 @@ mainThreadInstance
         dbRef.Child("comission/"+keyContrato).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar dados do contrato. Tente novamente mais tarde");
                 AuthController.authInstance.RaiseErrorPanel("Erro ao carregar dados do contrato. Tente novamente mais tarde");
                 if(!isRetorno)
                 {   //empilha titulo placeholder antes de sair da tela para manter sincronia das pilha de navegação
-                    //globalMenu.GetComponent<MenuController>().IrNovoTitulo("");
                     MenuController.menuControllerInstance.IrNovoTitulo("");
                 }
-                //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
                 MenuController.menuControllerInstance.IrJanelaAnterior();
             }
             else if (tarefa.IsCompleted)
@@ -1360,7 +1317,6 @@ mainThreadInstance
                     //para poder exibir o titulo do contrato como titulo da janela, este só é empilhado após o carregamento dos dados
                     if(!isRetorno)
                     {
-                        //globalMenu.GetComponent<MenuController>().IrNovoTitulo(snapshot.Child("titulo").GetValue(false).ToString());
                         MenuController.menuControllerInstance.IrNovoTitulo(snapshot.Child("titulo").GetValue(false).ToString());
                     }
 
@@ -1416,9 +1372,6 @@ mainThreadInstance
         //se idUsuario = -1, carrega dados do perfil do usuário atual e registra na pilha de navegação
         if (idUsuario.Equals("-1"))
         {
-            //idUsuario = authControllerObj.GetComponent<AuthController>().GetCurrentUserId();
-            //globalMenu.GetComponent<MenuController>().IrNovoTitulo("Meu Perfil");
-            //globalMenu.GetComponent<MenuController>().IrNovoAux(idUsuario);
             idUsuario = AuthController.authInstance.GetCurrentUserId();
             MenuController.menuControllerInstance.IrNovoTitulo("Meu Perfil");
             MenuController.menuControllerInstance.IrNovoAux(idUsuario);
@@ -1428,7 +1381,6 @@ mainThreadInstance
         dbRef.Child("infoUsuario").Child(MakeTokensValid(idUsuario)).GetValueAsync().ContinueWithOnMainThread(tarefa =>{
             if(tarefa.IsFaulted)
             {
-                //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar o perfil deste usuário. Tente novamente mais tarde");
                 AuthController.authInstance.RaiseErrorPanel("Erro ao carregar o perfil deste usuário. Tente novamente mais tarde");
             }
             else if (tarefa.IsCompleted)
@@ -1463,7 +1415,6 @@ mainThreadInstance
                     perfEditarIdade.text = snapshot.Child("idadeUsuario").GetValue(false).ToString();
                     perfEditarGenero.text = snapshot.Child("generoUsuario").GetValue(false).ToString();
 
-                    //if(globalMenu.GetComponent<MenuController>().GetTitulo().Equals("Meu Perfil"))
                     if(MenuController.menuControllerInstance.GetTitulo().Equals("Meu Perfil"))
                     {
                         //perfil deste usuario. habilita botao para editar
@@ -1499,7 +1450,6 @@ mainThreadInstance
 
         //atualiza lista de mensagens após o atraso
         listenHandlerCooldown = true;
-        //RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
         RefreshMensagemList(MenuController.menuControllerInstance.GetAux());
     }
 
@@ -1526,7 +1476,6 @@ mainThreadInstance
         yield return request.SendWebRequest();
         if(request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Erro ao carregar imagem: "+request.error);
             AuthController.authInstance.RaiseErrorPanel("Erro ao carregar imagem: "+request.error);
         }
         else
@@ -1580,7 +1529,6 @@ mainThreadInstance
             storageRef.Child(newImagePath).PutBytesAsync(((Texture2D)newImagem.texture).EncodeToPNG()).ContinueWithOnMainThread(tarefa => {
                 if(tarefa.IsFaulted || tarefa.IsCanceled){
                     //se falhar a publicar a imagem, salva contrato sem imagem
-                    //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Contrato será registrado sem imagem.");
                     AuthController.authInstance.RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Contrato será registrado sem imagem.");
                     newImagePath = "";
                 }
@@ -1647,7 +1595,6 @@ mainThreadInstance
         }
 
         //cria objeto Comission com dados definidos na tela, transforma em dicionário e publica para caminho adequado no servidor firebase
-        //dataComission = new Comission(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), newTitulo.text, newDescricao.text, newImagePath, newEstado.captionText.text, newCidade.captionText.text, thisFrequencia, thisTipo, newPreco.text, thisClasse);
         dataComission = new Comission(AuthController.authInstance.GetCurrentUserId(), newTitulo.text, newDescricao.text, newImagePath, newEstado.captionText.text, newCidade.captionText.text, thisFrequencia, thisTipo, newPreco.text, thisClasse);
         Dictionary<string,System.Object> dicComissao = dataComission.ToDictionary();
         var TarefaDB = dbRef.Child("comission").Push().SetValueAsync(dicComissao);
@@ -1656,7 +1603,6 @@ mainThreadInstance
 
         if (TarefaDB.Exception != null)
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar novo contrato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
             AuthController.authInstance.RaiseErrorPanel("Falha ao registrar novo contrato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
         }
         else{
@@ -1685,35 +1631,29 @@ mainThreadInstance
     IEnumerator CreateMensagem(string destino, string conteudo)
     {
         //cria objeto Message com valores inseridos e converte para dicionário
-        //dataMessage = new Message(dicNomesUsuarios[authControllerObj.GetComponent<AuthController>().GetCurrentUserId()],dicNomesUsuarios[destino],conteudo);
         dataMessage = new Message(dicNomesUsuarios[AuthController.authInstance.GetCurrentUserId()],dicNomesUsuarios[destino],conteudo);
         Dictionary<string,System.Object> dicMessage = dataMessage.ToDictionary();
 
         //registra inicio de conversa para usuário atual
-        //var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())+"/conversas/"+MakeTokensValid(destino)).SetValueAsync(destino);
         var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())+"/conversas/"+MakeTokensValid(destino)).SetValueAsync(destino);
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         //registra inicio de conversa para usuário recebendo a mensagem
-        //TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(destino)+"/conversas/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
         TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(destino)+"/conversas/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())).SetValueAsync(AuthController.authInstance.GetCurrentUserId());
 
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         //registra mensagem no servidor firebase na lista de mensagens trocadas na conversa destes dois usuários
-        //TarefaDB = dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), destino))).Push().SetValueAsync(dicMessage);
         TarefaDB = dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), destino))).Push().SetValueAsync(dicMessage);
 
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         if (TarefaDB.Exception != null)
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar nova mensagem: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");]
             AuthController.authInstance.RaiseErrorPanel("Falha ao registrar nova mensagem: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
         }
         else{
             //sucesso publicando nova mensagem. atualiza lista de exibição
-            //RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
             RefreshMensagemList(MenuController.menuControllerInstance.GetAux());
         }
 
@@ -1750,7 +1690,6 @@ mainThreadInstance
             storageRef.Child(newImagePath).PutBytesAsync(((Texture2D)perfEditarImagem.texture).EncodeToPNG()).ContinueWithOnMainThread(tarefa => {
                 if(tarefa.IsFaulted || tarefa.IsCanceled){
                     //se falhar a publicar a imagem, salva perfil sem imagem
-                    //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Perfil será registrado sem imagem.");
                     AuthController.authInstance.RaiseErrorPanel("Falha no upload da imagem. Tente novamente mais tarde. Perfil será registrado sem imagem.");
                     newImagePath = "";
                 }
@@ -1762,27 +1701,22 @@ mainThreadInstance
             newImagePath = "";
         }
         //cria novo objeto InfoUsuario, converte para dicionário e publica no caminho adequado no servidor firebase
-        //dataPerfil = new InfoUsuario(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),newPerfNome,newPerfGenero,newPerfIdade,newImagePath);
         dataPerfil = new InfoUsuario(AuthController.authInstance.GetCurrentUserId(),newPerfNome,newPerfGenero,newPerfIdade,newImagePath);
                     
         Dictionary<string,System.Object> dicPerfil = dataPerfil.ToDictionary();
-        //var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(dicPerfil);
         var TarefaDB = dbRef.Child("infoUsuario/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())).SetValueAsync(dicPerfil);
 
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         if (TarefaDB.Exception != null)
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar perfil: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
             AuthController.authInstance.RaiseErrorPanel("Falha ao registrar perfil: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
         }
         else{
             //perfil salvo com sucesso. atualiza tela de perfil e dicionário de nomes, e limpando path da image para uploads futuros
-            //CarregarPerfil(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
             CarregarPerfil(AuthController.authInstance.GetCurrentUserId());
 
             ClearImageField();
-            //globalMenu.GetComponent<MenuController>().IrJanelaAnterior();
             MenuController.menuControllerInstance.IrJanelaAnterior();
             PrepareDicNomes();
         }
@@ -1804,21 +1738,17 @@ mainThreadInstance
     IEnumerator CreateContato(string newContatoTipo, string newContatoValor)
     {
         //cria objeto Contato com valores inseridos, converte em dicionário e publica no caminho adequado no servidor firebase
-        //dataContato = new Contato(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),newContatoTipo,newContatoValor);
         dataContato = new Contato(AuthController.authInstance.GetCurrentUserId(),newContatoTipo,newContatoValor);
         Dictionary<string,System.Object> dicContato = dataContato.ToDictionary();
-        //var TarefaDB = dbRef.Child("contato/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).Push().SetValueAsync(dicContato);
         var TarefaDB = dbRef.Child("contato/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())).Push().SetValueAsync(dicContato);
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
 
         if (TarefaDB.Exception != null)
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar novo contato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
             AuthController.authInstance.RaiseErrorPanel("Falha ao registrar novo contato: "+(TarefaDB.Exception)+" Tente novamente mais tarde.");
         }
         else{
             //contato salvo com suceso. atualiza lista sendo exibida
-            //RefreshContatoList(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
             RefreshContatoList(AuthController.authInstance.GetCurrentUserId());
         }
     }
@@ -1838,17 +1768,14 @@ mainThreadInstance
     IEnumerator CreateAval(string avaliadoId)
     {
         //cria objeto Avaliacao com valor inserido e usuários associados, converte para dicionário e salva no local adequado no servidor 
-        //dataAval = new Avaliacao(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(),avalSlider.value.ToString("F1"));
         dataAval = new Avaliacao(AuthController.authInstance.GetCurrentUserId(),avalSlider.value.ToString("F1"));
         Dictionary<string,System.Object> dicAvaliacao = dataAval.ToDictionary();
-        //var TarefaDB = dbRef.Child("avaliacao/"+MakeTokensValid(avaliadoId)+"/"+MakeTokensValid(authControllerObj.GetComponent<AuthController>().GetCurrentUserId())).SetValueAsync(dicAvaliacao);
         var TarefaDB = dbRef.Child("avaliacao/"+MakeTokensValid(avaliadoId)+"/"+MakeTokensValid(AuthController.authInstance.GetCurrentUserId())).SetValueAsync(dicAvaliacao);
         
 
         yield return new WaitUntil(predicate: ()=> TarefaDB.IsCompleted);
         if (TarefaDB.Exception != null) 
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("Falha ao registrar nova avaliação: "+(TarefaDB.Exception)+" Tente novamente mais tarde");
             AuthController.authInstance.RaiseErrorPanel("Falha ao registrar nova avaliação: "+(TarefaDB.Exception)+" Tente novamente mais tarde");
         }
         else{
@@ -1957,7 +1884,6 @@ mainThreadInstance
     ****************/
     public void SetContatoButton()
     {
-        //if(globalMenu.GetComponent<MenuController>().GetAux().Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
         if(MenuController.menuControllerInstance.GetAux().Equals(AuthController.authInstance.GetCurrentUserId()))
         {
             contButtonText.text = "Adicionar forma de contato";
@@ -1978,7 +1904,6 @@ mainThreadInstance
     ****************/
     public void ContatoButtonHandler()
     {
-        //if(globalMenu.GetComponent<MenuController>().GetAux().Equals(authControllerObj.GetComponent<AuthController>().GetCurrentUserId()))
         if(MenuController.menuControllerInstance.GetAux().Equals(AuthController.authInstance.GetCurrentUserId()))
         {
             //abrir painel de criar contato
@@ -1986,10 +1911,6 @@ mainThreadInstance
         }
         else{
             //registra navegação na pila
-            /*implementação antiga sem singleton
-            globalMenu.GetComponent<MenuController>().IrNovoAux(globalMenu.GetComponent<MenuController>().GetAux());
-            globalMenu.GetComponent<MenuController>().IrNovoTitulo("Conversa com "+dicNomesUsuarios[globalMenu.GetComponent<MenuController>().GetAux()]);
-            globalMenu.GetComponent<MenuController>().IrNovaJanela(msgListaPanel);*/
             MenuController.menuControllerInstance.IrNovoAux(MenuController.menuControllerInstance.GetAux());
             MenuController.menuControllerInstance.IrNovoTitulo("Conversa com "+dicNomesUsuarios[MenuController.menuControllerInstance.GetAux()]);
             MenuController.menuControllerInstance.IrNovaJanela(msgListaPanel);
@@ -2006,7 +1927,7 @@ mainThreadInstance
     /****************
     Método DataBridge.ReactivateFilterHandler()
 
-    Atuali1za checkboxes da janela de filtros, desativando caixas de dias da semana se a opção for desselecionada e reabilitando quando marcada novamente
+    Atualiza checkboxes da janela de filtros, desativando caixas de dias da semana se a opção for desselecionada e reabilitando quando marcada novamente
 
     Entrada:
     -   filterFrequenciaSemanal: valor da checkbox que filtra contratos que se repetem semanalmente 
@@ -2060,7 +1981,6 @@ mainThreadInstance
         //só atualiza se tiverem passado 0.1s entre atualizações para evitar acessos excessivos ao banco
         if (listenHandlerCooldown)
         {
-            //RefreshMensagemList(globalMenu.GetComponent<MenuController>().GetAux());
             Debug.Log("Nova mensagem. Refresh conversa com "+MenuController.menuControllerInstance.GetAux());
             listenHandlerCooldown = false;
             StartCoroutine(CooldownHandler());
@@ -2084,17 +2004,13 @@ mainThreadInstance
     {
         path = "";
         perfEditarImagem.texture = new Texture2D(600,600) as Texture;
-            perfEditarImagem.rectTransform.sizeDelta= new Vector2(
-                perfEditarImagem.texture.width * 600 / Mathf.Max(perfEditarImagem.texture.width,perfEditarImagem.texture.height),
-                perfEditarImagem.texture.height * 600 / Math.Max(perfEditarImagem.texture.width,perfEditarImagem.texture.height));
-        /*infoImagem.texture = new Texture2D(600,600) as Texture;
-            infoImagem.rectTransform.sizeDelta= new Vector2(
-                infoImagem.texture.width * 600 / Mathf.Max(infoImagem.texture.width,infoImagem.texture.height),
-                infoImagem.texture.height * 600 / Math.Max(infoImagem.texture.width,infoImagem.texture.height));*/
+        perfEditarImagem.rectTransform.sizeDelta= new Vector2(
+            perfEditarImagem.texture.width * 600 / Mathf.Max(perfEditarImagem.texture.width,perfEditarImagem.texture.height),
+            perfEditarImagem.texture.height * 600 / Math.Max(perfEditarImagem.texture.width,perfEditarImagem.texture.height));
         newImagem.texture = new Texture2D(600,600) as Texture;
-            newImagem.rectTransform.sizeDelta= new Vector2(
-                newImagem.texture.width * 600 / Mathf.Max(newImagem.texture.width,newImagem.texture.height),
-                newImagem.texture.height * 600 / Math.Max(newImagem.texture.width,perfEditarImagem.texture.height));
+        newImagem.rectTransform.sizeDelta= new Vector2(
+            newImagem.texture.width * 600 / Mathf.Max(newImagem.texture.width,newImagem.texture.height),
+            newImagem.texture.height * 600 / Math.Max(newImagem.texture.width,perfEditarImagem.texture.height));
     }
     
     //limpa filtros de exibição de contrato para exibir todos. mantem apenas classe como "Comissão" ou "Serviço" pois telas são separadas
@@ -2211,7 +2127,6 @@ mainThreadInstance
     {
         if((filterPrecoMin.text!="" && StringToFloat(filterPrecoMin.text)<=0) || (filterPrecoMax.text != "" && StringToFloat(filterPrecoMax.text)<=0) || (filterPrecoMin.text!="" && filterPrecoMax.text!="" &&StringToFloat(filterPrecoMin.text)>StringToFloat(filterPrecoMax.text)))
         {
-            //authControllerObj.GetComponent<AuthController>().RaiseErrorPanel("O preço mínimo deve ser menor que o máximo, e ambos devem ser maiores que 0");
             AuthController.authInstance.RaiseErrorPanel("O preço mínimo deve ser menor que o máximo, e ambos devem ser maiores que 0");
             filterPrecoMin.text = "";
             filterPrecoMax.text = "";
@@ -2282,7 +2197,6 @@ mainThreadInstance
     public void IrConversaContrato(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
-        //MenuController menu = globalMenu.GetComponent<MenuController>();
 
         MenuController.menuControllerInstance.IrNovaJanela(msgListaPanel);
         MenuController.menuControllerInstance.IrNovoAux(idUsuario);
@@ -2290,7 +2204,6 @@ mainThreadInstance
         //carrega mensagens trocadas entre este usuário e o outro
         RefreshMensagemList(idUsuario);
         //habilita listener para atualizar lista ao receber nova mensagem
-        //dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
         dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
     }
 
@@ -2309,11 +2222,10 @@ mainThreadInstance
     public void IrPerfilContrato(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
-        //MenuController menu = globalMenu.GetComponent<MenuController>();
-
         MenuController.menuControllerInstance.IrNovaJanela(perfilPanel);
         MenuController.menuControllerInstance.IrNovoAux(idUsuario);
         MenuController.menuControllerInstance.IrNovoTitulo("Perfil de "+dicNomesUsuarios[idUsuario]);
+
         //carrega informações do perfil
         CarregarPerfil(idUsuario);
     }
@@ -2334,14 +2246,12 @@ mainThreadInstance
     public void IrMensagemList(string idUsuario)
     {
         //registra navegação na pilha para permitir voltar depois
-        //MenuController menu = globalMenu.GetComponent<MenuController>();
         MenuController.menuControllerInstance.IrNovaJanela(msgListaPanel);
         MenuController.menuControllerInstance.IrNovoAux(idUsuario);
         MenuController.menuControllerInstance.IrNovoTitulo("Conversa com "+dicNomesUsuarios[idUsuario]);
         //carrega lista de mensagens trocadas entre usuários
         RefreshMensagemList(idUsuario);
         //habilita listener para atualizar lista ao receber nova mensagem
-        //dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
         dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), idUsuario))).ChildAdded += ConversaListenHandler;
     }
 
@@ -2376,7 +2286,6 @@ mainThreadInstance
     public void RemoveContato(string contatoKey)
     {
         dbRef.Child("contato/"+contatoKey).RemoveValueAsync();
-        //RefreshContatoList(authControllerObj.GetComponent<AuthController>().GetCurrentUserId());
         RefreshContatoList(AuthController.authInstance.GetCurrentUserId());
     }
 
@@ -2393,7 +2302,6 @@ mainThreadInstance
     ****************/
     public void RemoveListener(string idUsuario)
     {
-        //dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(authControllerObj.GetComponent<AuthController>().GetCurrentUserId(), idUsuario))).ChildAdded -= ConversaListenHandler;
         dbRef.Child("conversas/"+MakeTokensValid(SortStringsAlpha(AuthController.authInstance.GetCurrentUserId(), idUsuario))).ChildAdded -= ConversaListenHandler;
     }
 }

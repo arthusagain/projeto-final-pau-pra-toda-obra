@@ -207,10 +207,6 @@ public class AuthController : MonoBehaviour
             Firebase.Auth.FirebaseUser novoUsuario = task.Result;
             UnityMainThread.mainThreadInstance.AddJob(()=>{
             // Para manter a organização da funcionalidade de botão de retornar à janela anterior, os valores adequados são adicionados à suas pilhas. Este funcionamento é explicado na classe MenuController
-            /* implementação antiga sem singleton
-            globalMenu.GetComponent<MenuController>().IrNovoTitulo("Criar meu perfil");
-            globalMenu.GetComponent<MenuController>().IrNovaJanela(editarPerfilMenu);
-            globalMenu.GetComponent<MenuController>().IrNovoAux("");*/
             MenuController.menuControllerInstance.IrNovoTitulo("Criar meu perfil");
             MenuController.menuControllerInstance.IrNovaJanela(editarPerfilMenu);
             MenuController.menuControllerInstance.IrNovoAux("");
