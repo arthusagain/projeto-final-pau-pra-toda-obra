@@ -189,6 +189,14 @@ public class AuthController : MonoBehaviour
             return;
         }
 
+        //Verifica se senhas coincidem
+        if (!confirmPasswordInputReg.text.Equals(passwordInputReg.text))
+        {
+            Debug.LogError("Senhas diferentes.");
+            RaiseErrorPanel("As senhas inseridas não coincidem");
+            return;
+        }
+
         // Realiza uma tentativa de registro no sistema com as credenciais inseridas
         Firebase.Auth.FirebaseAuth.DefaultInstance.CreateUserWithEmailAndPasswordAsync(emailInputReg.text, passwordInputReg.text).ContinueWith(task => {
             if (task.IsCanceled) {
